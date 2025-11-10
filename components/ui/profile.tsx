@@ -1,0 +1,194 @@
+import { Colors } from '@/constants/theme';
+import { Image } from 'expo-image';
+import { ChevronLeft } from 'lucide-react-native';
+import React from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const dummyPosts = [
+  { id: '1', image: 'https://picsum.photos/500/500?1' },
+  { id: '2', image: 'https://picsum.photos/200/200?2' },
+  { id: '3', image: 'https://picsum.photos/200/200?3' },
+  { id: '4', image: 'https://picsum.photos/200/200?4' },
+  { id: '5', image: 'https://picsum.photos/200/200?5' },
+  { id: '6', image: 'https://picsum.photos/200/200?6' },
+];
+
+const Profile = ({type}: {type: 'user' | 'others'}) => {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}>
+        {/* page header */}
+        <View style={styles.pageHeader}>
+            <Text style={{
+                color: theme.text, 
+                fontWeight: 800, 
+                fontFamily: 'Pacifico_400Regular'
+                }}><ChevronLeft strokeWidth={4} color={theme.text} size={26} /></Text>
+            <Text style={{
+                color: theme.text, 
+                fontWeight: 800, 
+                fontSize: 20, 
+                fontFamily: 'Pacifico_400Regular'
+                }}>cynthia@gmail.com</Text>
+            <Text style={{
+                color: theme.text, 
+                fontWeight: 800, 
+                fontSize: 20, 
+                fontFamily: 'Pacifico_400Regular'
+                }}> </Text>
+        </View>
+      {/* Profile header */}
+      <View style={styles.header}>
+        <Image
+          source={{ uri: 'https://i.pravatar.cc/150?img=12' }}
+          style={styles.avatar}
+        />
+        <View style={styles.stats}>
+          <View style={styles.stat}>
+            <Text style={[styles.statNumber, { color: theme.text }]}>24</Text>
+            <Text style={[styles.statLabel, { color: theme.placeholder }]}>Posts</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={[styles.statNumber, { color: theme.text }]}>1.2K</Text>
+            <Text style={[styles.statLabel, { color: theme.placeholder }]}>Followers</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={[styles.statNumber, { color: theme.text }]}>300</Text>
+            <Text style={[styles.statLabel, { color: theme.placeholder }]}>Following</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Username and bio */}
+      <View style={styles.userInfo}>
+        <Text style={[styles.username, { color: theme.text }]}>johndoe</Text>
+        <Text style={[styles.bio, { color: theme.text }]}>Travel, Photography & Lifestyle 📸✈️</Text>
+      </View>
+
+        {
+            type === 'user' ? (
+        // Edit Profile button
+        <View style={styles.actionButtons}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: theme.ashButton}]}>
+            <Text style={[styles.buttonText, {color: theme.text}]}>Edit Profile</Text>
+            </TouchableOpacity>
+        </View>
+            )
+            : (
+        // Follow and Message buttons
+      <View style={styles.actionButtons}>
+
+        <TouchableOpacity style={[styles.button, { backgroundColor: theme.tint }]}>
+          <Text style={styles.buttonText}>Follow</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, { backgroundColor: theme.tabIconDefault }]}>
+          <Text style={styles.buttonText}>Message</Text>
+        </TouchableOpacity>
+      </View>
+            )
+        }
+      
+
+      {/* User posts */}
+      <FlatList
+        data={dummyPosts}
+        keyExtractor={(item) => item.id}
+        numColumns={3}
+        columnWrapperStyle={{ justifyContent: 'space-between', marginVertical: 1}}
+        renderItem={({ item }) => (
+          <Image
+            source={{ uri: item.image }}
+            style={styles.postImage}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            priority="high"
+          />
+        )}
+        contentContainerStyle={{ marginTop: 10 }}
+      />
+    </SafeAreaView>
+  );
+};
+
+export default Profile;
+
+    const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingVertical: 15,
+    },
+    pageHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingBottom: 10,
+            paddingHorizontal: 15,
+            marginBottom: 16,
+            borderBottomColor: Colors.dark.border,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingHorizontal: 15,
+    },
+    avatar: {
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+    },
+    stats: {
+        flexDirection: 'row',
+        flex: 1,
+        justifyContent: 'space-around',
+        marginLeft: 16,
+    },
+    stat: {
+        alignItems: 'center',
+    },
+    statNumber: {
+        fontWeight: '700',
+        fontSize: 16,
+    },
+    statLabel: {
+        fontSize: 12,
+        marginTop: 2,
+    },
+    userInfo: {
+        marginBottom: 12,
+        paddingHorizontal: 15,
+    },
+    username: {
+        fontWeight: '700',
+        fontSize: 18,
+    },
+    bio: {
+        fontSize: 14,
+        marginTop: 4,
+    },
+    actionButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 12,
+        paddingHorizontal: 15,
+    },
+    button: {
+        flex: 1,
+        paddingVertical: 8,
+        borderRadius: 6,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
+    postImage: {
+        width: '33%',
+        aspectRatio: 1,
+        borderRadius: 1,
+    },
+    });
