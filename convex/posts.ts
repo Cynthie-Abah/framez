@@ -34,6 +34,18 @@ export const getAllPosts = query({
   },
 });
 
+// fetch all posts by a user - read - CONSUMED
+export const getAllPostsbyUser = query({
+  args: { userId: v.id("users") },
+  handler: async ({ db }, { userId }) => {
+    const posts = await db
+      .query("posts")
+      .filter((q) => q.eq(q.field("authorId"), userId))
+      .collect();
+    return posts;
+  },
+});
+
 // like a post/comment on a  post - update
 export const updateLikes = mutation({
   args: {

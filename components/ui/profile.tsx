@@ -1,38 +1,32 @@
-import { Colors } from '@/constants/theme';
+import { Colors, defaultAvatar } from '@/constants/theme';
+import { Id } from '@/convex/_generated/dataModel';
+import { useUserProfile } from '@/hooks/use-user-profile';
+import useAuthStore from '@/store';
 import { Image } from 'expo-image';
 import { ChevronLeft } from 'lucide-react-native';
 import React from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const dummyPosts = [
-  { id: '1', image: 'https://picsum.photos/500/500?1' },
-  { id: '2', image: 'https://picsum.photos/200/200?2' },
-  { id: '3', image: 'https://picsum.photos/200/200?3' },
-  { id: '4', image: 'https://picsum.photos/200/200?4' },
-  { id: '5', image: 'https://picsum.photos/200/200?5' },
-  { id: '6', image: 'https://picsum.photos/200/200?6' },
-];
 
 const Profile = ({type}: {type: 'user' | 'others'}) => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  const {user: item} = useAuthStore();
+  const {userProfile, error, isLoading} = useUserProfile(item?._id as Id<"users">)
 
+if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}><ActivityIndicator /></SafeAreaView>
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}>
         {/* page header */}
         <View style={styles.pageHeader}>
-            <Text style={{
-                color: theme.text, 
-                fontWeight: 800, 
-                fontFamily: 'Pacifico_400Regular'
-                }}><ChevronLeft strokeWidth={4} color={theme.text} size={26} /></Text>
+          {/* set the back button */}
+            <TouchableOpacity><ChevronLeft strokeWidth={4} color={theme.text} size={26} /></TouchableOpacity>
             <Text style={{
                 color: theme.text, 
                 fontWeight: 800, 
                 fontSize: 20, 
                 fontFamily: 'Pacifico_400Regular'
-                }}>cynthia@gmail.com</Text>
+                }}>{userProfile.email}</Text>
             <Text style={{
                 color: theme.text, 
                 fontWeight: 800, 
@@ -43,20 +37,20 @@ const Profile = ({type}: {type: 'user' | 'others'}) => {
       {/* Profile header */}
       <View style={styles.header}>
         <Image
-          source={{ uri: 'https://i.pravatar.cc/150?img=12' }}
+          source={{ uri: userProfile.avatar || defaultAvatar }}
           style={styles.avatar}
         />
         <View style={styles.stats}>
           <View style={styles.stat}>
-            <Text style={[styles.statNumber, { color: theme.text }]}>24</Text>
+            <Text style={[styles.statNumber, { color: theme.text }]}>{userProfile.posts?.length}</Text>
             <Text style={[styles.statLabel, { color: theme.placeholder }]}>Posts</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={[styles.statNumber, { color: theme.text }]}>1.2K</Text>
+            <Text style={[styles.statNumber, { color: theme.text }]}>{userProfile.followers?.length}</Text>
             <Text style={[styles.statLabel, { color: theme.placeholder }]}>Followers</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={[styles.statNumber, { color: theme.text }]}>300</Text>
+            <Text style={[styles.statNumber, { color: theme.text }]}>{userProfile.following?.length}</Text>
             <Text style={[styles.statLabel, { color: theme.placeholder }]}>Following</Text>
           </View>
         </View>
@@ -64,13 +58,13 @@ const Profile = ({type}: {type: 'user' | 'others'}) => {
 
       {/* Username and bio */}
       <View style={styles.userInfo}>
-        <Text style={[styles.username, { color: theme.text }]}>johndoe</Text>
+        <Text style={[styles.username, { color: theme.text }]}>{userProfile.username}</Text>
         <Text style={[styles.bio, { color: theme.text }]}>Travel, Photography & Lifestyle 📸✈️</Text>
       </View>
 
         {
             type === 'user' ? (
-        // Edit Profile button
+        // Edit Profile redirects to settings - remeber to add that functionality 
         <View style={styles.actionButtons}>
             <TouchableOpacity style={[styles.button, { backgroundColor: theme.ashButton}]}>
             <Text style={[styles.buttonText, {color: theme.text}]}>Edit Profile</Text>
@@ -95,13 +89,16 @@ const Profile = ({type}: {type: 'user' | 'others'}) => {
 
       {/* User posts */}
       <FlatList
-        data={dummyPosts}
-        keyExtractor={(item) => item.id}
+        data={userProfile.posts}
+        keyExtractor={(item) => item._id}
         numColumns={3}
-        columnWrapperStyle={{ justifyContent: 'space-between', marginVertical: 1}}
+        columnWrapperStyle={{ 
+          justifyContent: userProfile.posts && userProfile.posts?.length >= 3 ? 
+          'space-between' : 'flex-start' , 
+          marginVertical: 1}}
         renderItem={({ item }) => (
           <Image
-            source={{ uri: item.image }}
+            source={{ uri: item.image[0] }}
             style={styles.postImage}
             contentFit="cover"
             cachePolicy="memory-disk"

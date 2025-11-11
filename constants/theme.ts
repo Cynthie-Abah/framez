@@ -10,6 +10,8 @@ const instagramLightBackground = "#ffffff";
 const feedDarkBackground = 'rgb(12, 16, 20)';
 const feedLightBackground = "#ffffff";
 
+export const defaultAvatar = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'
+
 export const Colors = {
   light: {
     text: "#262626", 

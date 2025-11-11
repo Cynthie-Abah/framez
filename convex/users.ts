@@ -43,7 +43,7 @@ export const createUser = mutation({
 
   },
 });
-// READ - Get a user info
+// READ - Get a user info by clerkid
 export const getUserById = query({
   args: { userId: v.string() },
   handler: async ({ db }, { userId }) => {
@@ -51,6 +51,15 @@ export const getUserById = query({
       .query("users")
       .filter((q) => q.eq(q.field("clerkId"), userId))
       .first();
+    return user;
+  },
+});
+
+// READ - Get a user info by clerkid
+export const getUserByConvexId = query({
+  args: { userId: v.id("users") },
+  handler: async ({ db }, { userId }) => {
+    const user = await db.get(userId)
     return user;
   },
 });

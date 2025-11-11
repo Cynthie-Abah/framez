@@ -1,4 +1,4 @@
-import { Colors } from '@/constants/theme';
+import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
 import { useToggleLike } from '@/hooks/use-like-post';
 import useAuthStore from '@/store';
@@ -16,11 +16,12 @@ import {
     useColorScheme,
     View
 } from 'react-native';
+import Comments from './comments';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function PostCard({item}: {item: Post}) {
-    const [openComment, setOpenComment] = useState();
+    const [openComment, setOpenComment] = useState(false);
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
     const {toggleLike} = useToggleLike();
@@ -44,7 +45,7 @@ export default function PostCard({item}: {item: Post}) {
             <TouchableOpacity style={styles.postHeader}>
     
                 <Image source={{ 
-                    uri: item.userAvatar || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'
+                    uri: item.userAvatar || defaultAvatar
                       }} style={styles.avatar} />
     
                 <View style={{gap: 4}}>
@@ -90,7 +91,7 @@ export default function PostCard({item}: {item: Post}) {
             </TouchableOpacity>
             
                 {/* comments */}
-            <TouchableOpacity style={{ marginRight: 16 }}>
+            <TouchableOpacity onPress={()=> setOpenComment(!openComment)} style={{ marginRight: 16 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <MessageCircle color={theme.text} size={27} strokeWidth={2.5}/> 
                 <Text style={{ color: theme.text }}>{item.comments.length}</Text></View>
@@ -102,6 +103,10 @@ export default function PostCard({item}: {item: Post}) {
     
           {/* Post time */}
           <Text style={[styles.caption, { color: theme.placeholder }]}>{formatTimeAgo(item._creationTime)}</Text>
+          
+         {openComment && (
+            <Comments comments={item.comments} />
+)}
         </View>
   )
 }

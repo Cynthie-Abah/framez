@@ -1,6 +1,6 @@
 import Menu from '@/components/ui/Menu';
 import PostCard from '@/components/ui/post-card';
-import { Colors } from '@/constants/theme';
+import { Colors, defaultAvatar } from '@/constants/theme';
 import { usePosts } from '@/hooks/use-posts';
 import useAuthStore from '@/store';
 import { Post } from '@/type';
@@ -48,7 +48,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
                 source={{ uri: 
                     user?.avatar ? 
                     user?.avatar : 
-                    'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' }}
+                    defaultAvatar }}
                 style={styles.avatar}
             />
             

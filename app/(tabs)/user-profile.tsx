@@ -1,7 +1,5 @@
 import Profile from '@/components/ui/profile';
-import { Colors } from '@/constants/theme';
 import React from 'react';
-import { useColorScheme } from 'react-native';
 
 const dummyPosts = [
   { id: '1', image: 'https://picsum.photos/200/200?1' },
@@ -13,8 +11,6 @@ const dummyPosts = [
 ];
 
 const UserProfile = () => {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
 
   return (
     <Profile type="user" />
