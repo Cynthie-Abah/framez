@@ -35,6 +35,7 @@ export default function PostCard({item}: {item: Post}) {
    const {deletePost} = useDeletePost();
 
     const isLiked = item.likes.find((like)=> like.userId  === user?._id )
+    const canDelete = item.authorId === user?._id
 
     const handleLikeToggle = ()=>{
         if (user) {
@@ -90,6 +91,8 @@ export default function PostCard({item}: {item: Post}) {
         {/** Dropdown */}
         {openPostMenu && (
           <Animated.View style={[styles.dropdown,{backgroundColor: theme.background} ]}>
+          {canDelete &&
+            <>
             {/* EDIT POST */}
             {/* <TouchableOpacity style={styles.item} >
               <Text style={{color: theme.text, fontWeight: '600'}}>Edit</Text>
@@ -97,6 +100,11 @@ export default function PostCard({item}: {item: Post}) {
 
             <TouchableOpacity style={styles.item}>
               <Text onPress={()=> setOpenDeleteModal(true)} style={{color: theme.text, fontWeight: '600'}}>Delete</Text>
+            </TouchableOpacity>
+            </>
+            }
+            <TouchableOpacity style={styles.item} >
+              <Text style={{color: theme.text, fontWeight: '600'}}>Share</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -161,7 +169,10 @@ export default function PostCard({item}: {item: Post}) {
           <Text style={[styles.caption, { color: theme.placeholder }]}>{formatTimeAgo(item._creationTime)}</Text>
           
          {openComment && (
-            <Comments postId={item._id} comments={item.comments} />
+            <Comments 
+            canDelete={canDelete} 
+            postId={item._id} 
+            comments={item.comments.reverse()} />
         )}
         <DeleteModal 
         openDeleteModal={openDeleteModal} 

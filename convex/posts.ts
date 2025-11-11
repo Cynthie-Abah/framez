@@ -136,6 +136,47 @@ export const deletePost = mutation({
   },
 });
 
+// delete a comment - delete
+export const deleteComment = mutation({
+  args: {
+    postId: v.id("posts"), 
+    userId: v.id("users"),
+    timestamp: v.number(),
+  },
+
+  handler: async (
+    { db },
+    { postId, userId, timestamp }: {
+      postId: Id<'posts'>,
+      userId: Id<'users'>,
+      timestamp: number
+    }
+  ) => {
+    const post = await db.get(postId);
+
+    if (!post) return { success: false, message: "Post not found" };
+
+    if (post.authorId === userId) {
+
+      const comment = post.comments.find(
+      (c) => c.timestamp === timestamp
+    );
+    if (!comment) throw new Error("Comment not found");
+
+      // Filter out the comment
+    const updatedComments = post.comments.filter(
+      (c) => c.timestamp !== timestamp
+    );
+
+    // Update the post
+    await db.patch(postId, { comments: updatedComments });
+      return { success: true, message: "Comment deleted successfully" };
+    } else {
+      return { success: false, message: "You are not authorized to delete this comment" };
+    }
+  },
+});
+
 // follow/unfollow a user - update
 export const updateFollow = mutation({
   args: {

@@ -18,6 +18,7 @@ const Menu = () => {
     const handleSignOut = async () => {
     try {
       await signOut()
+      setVisible(false)
       router.replace('/')
     } catch (err) {
       console.error(JSON.stringify(err, null, 2))
@@ -40,7 +41,7 @@ const Menu = () => {
         style={styles.modal}
       >
         <View style={[styles.menuContainer, {backgroundColor: theme.background}]}>
-          <TouchableOpacity style={styles.menuItem} onPress={()=> router.push('/(tabs)/user-profile')}>
+          <TouchableOpacity style={styles.menuItem} onPress={()=>{ router.push('/(tabs)/user-profile'); setVisible(false)}}>
             <Text style={[styles.menuText, {color: theme.text}]}>Profile</Text>
           </TouchableOpacity>
           {/* <TouchableOpacity style={styles.menuItem} >

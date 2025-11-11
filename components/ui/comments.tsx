@@ -1,19 +1,33 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
 import { useComment } from '@/hooks/use-comment';
+import { useDeleteComment } from '@/hooks/use-delete-comment';
 import useAuthStore from '@/store';
 import { Comment } from '@/type';
 import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';
+import { Trash } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 
-const Comments = ({postId, comments}: {comments: Comment[], postId: Id<"posts">}) => {
+const Comments = ({postId, comments, canDelete}: {comments: Comment[], postId: Id<"posts">, canDelete: boolean}) => {
   const [comment, setComment] = useState<string>('');
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
     const {user} = useAuthStore();
     const {commentOnPost} = useComment();
+    const { deleteComment } = useDeleteComment();
+
+    const handleDelete = ({userId, timestamp}: {userId: Id<"users">, timestamp: number}) => {
+        Alert.alert(
+        'Delete comment?',
+        'This action cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: () => deleteComment({postId, userId, timestamp }) },
+        ]
+      );
+      }
 
     const handleComment = ()=> {
       if (!comment || !user) return
@@ -54,10 +68,11 @@ const Comments = ({postId, comments}: {comments: Comment[], postId: Id<"posts">}
           style={{
             flexDirection: 'row',
             alignItems: 'flex-start',
-            marginBottom: 12,
+            marginBottom: 15,
             gap: 8,
           }}
         >
+          
           {/* Avatar */}
           <Image
             source={{ uri: comment.userAvatar || defaultAvatar }}
@@ -86,6 +101,14 @@ const Comments = ({postId, comments}: {comments: Comment[], postId: Id<"posts">}
               {/* · Reply */}
             </Text>
           </View>
+
+           {canDelete && (
+            <TouchableOpacity onPress={()=> handleDelete({userId: comment.userId, timestamp: comment.timestamp})}>
+              <Trash size={18} color={Colors.dark.gradientMiddle} />
+            </TouchableOpacity>
+          )}
+
+
         </View>
       ))
     ) : (
