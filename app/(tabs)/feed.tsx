@@ -1,11 +1,12 @@
+import Menu from '@/components/ui/Menu';
 import PostCard from '@/components/ui/post-card';
 import { Colors } from '@/constants/theme';
+import useAuthStore from '@/store';
 import { Image } from 'expo-image';
-import { Activity } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import {
+    ActivityIndicator,
     FlatList,
-    Pressable,
     StyleSheet,
     Text,
     useColorScheme,
@@ -50,12 +51,17 @@ const dummyPosts = [
     const Feed = () => {
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-    const [postText, setPostText] = useState('');
     // use interface for post item
     const renderPost = ({ item }: any) => (
     <PostCard item={item} />
     );
 
+     const {user, isAuthenticated} = useAuthStore();
+
+     if (!user && !isAuthenticated) {
+        return <SafeAreaView style={{ flex: 1, backgroundColor: theme.feedBackground }}><ActivityIndicator /></SafeAreaView>
+     }
+    console.log(user, 'user data');
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.feedBackground }}>
             <FlatList
@@ -64,15 +70,16 @@ const dummyPosts = [
         ListHeaderComponent={
             <View style={[styles.headerContainer]}>
             <Image
-                source={{ uri: 'https://picsum.photos/200' }}
+                source={{ uri: 
+                    user?.avatar ? 
+                    user?.avatar : 
+                    'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' }}
                 style={styles.avatar}
             />
             
             <Text style={{color: theme.text, fontWeight: 800, fontSize: 30, fontFamily: 'Pacifico_400Regular'}}> Framez</Text>
 
-            <Pressable>
-            <Activity size={26} color={theme.text} />
-            </Pressable>
+            <Menu />
             
             </View>
         }
@@ -80,6 +87,7 @@ const dummyPosts = [
         contentContainerStyle={{ paddingVertical: 16 }}
         showsVerticalScrollIndicator={false}
         />
+
         </SafeAreaView>
         
     );
@@ -93,6 +101,7 @@ export default Feed;
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 16,
+        paddingTop: 0,
         marginBottom: 16,
         borderBottomColor: Colors.dark.border,
         borderBottomWidth: .5,
@@ -108,3 +117,4 @@ export default Feed;
         borderRadius: 20,
     },
     });
+

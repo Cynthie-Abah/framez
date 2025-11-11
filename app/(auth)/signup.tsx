@@ -1,136 +1,231 @@
+import EmailVerification from '@/components/ui/email-verification'
 import Input from '@/components/ui/input'
+import Logo from '@/components/ui/logo'
 import { Colors } from '@/constants/theme'
+import { api } from '@/convex/_generated/api'
 import { useSignUp } from '@clerk/clerk-expo'
-import { Link, useRouter } from 'expo-router'
-import { Images } from 'lucide-react-native'
+import { useMutation } from 'convex/react'
+import { Link } from 'expo-router'
 import { useState } from 'react'
+import { Controller, useForm } from "react-hook-form"
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     useColorScheme,
     View
 } from 'react-native'
+import Toast from 'react-native-toast-message'
+
+type SignUpForm = {
+  emailAddress: string
+  password: string
+  confirmPassword: string
+  username: string
+}
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
-  const router = useRouter()
+  const { control, watch, handleSubmit, formState: { errors, isSubmitting }} = useForm<SignUpForm>();
 
-  const [emailAddress, setEmailAddress] = useState('')
-  const [password, setPassword] = useState('')
   const [pendingVerification, setPendingVerification] = useState(false)
   const [code, setCode] = useState('')
   const colorScheme = useColorScheme();
-  const [loading, setLoading]  = useState();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  const createUser = useMutation(api.users.createUser);
 
-  // Handle submission of sign-up form
-  const onSignUpPress = async () => {
+
+  const onSignUpPress = async (data: SignUpForm) => {
     if (!isLoaded) return
-
-    // Start sign-up process using email and password provided
+    const { emailAddress, password } = data
     try {
       await signUp.create({
         emailAddress,
         password,
       })
 
-      // Send user an email with verification code
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
       setPendingVerification(true)
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
+    } catch (err: any) {
+        if (err instanceof Error) {
+        Toast.show({
+        type: 'error',
+        text1: 'Error Signing up',
+        text2: err.message
+        });  
+        }
       console.error(JSON.stringify(err, null, 2))
     }
   }
 
-  // Handle submission of verification form
+
   const onVerifyPress = async () => {
-    if (!isLoaded) return
+     if (!isLoaded) return;
 
-    try {
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
-      })
+  try {
+    const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
 
-      // If verification was completed, set the session to active
-      // and redirect the user
-      if (signUpAttempt.status === 'complete') {
-        await setActive({ session: signUpAttempt.createdSessionId })
-        router.replace('/')
-      } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error(JSON.stringify(signUpAttempt, null, 2))
-      }
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
+    if (signUpAttempt.status === "complete") {
+      await setActive({ session: signUpAttempt.createdSessionId });
+        const user = signUp;
+        if (user) {
+            await createUser({
+                clerkId: user?.id || '', 
+                email: user?.emailAddress || '', 
+                username: user?.username || '',
+                followers: [],
+                following: []
+            });
+            return user
+        }
+    } else {
+      console.error("Verification not complete:", JSON.stringify(signUpAttempt, null, 2));
+    }
+    } catch (err: any) {
+        if (
+            err.code === "api_response_error" && 
+            err.status === 429) {
+        Toast.show({
+            type: 'error',
+            text1: "Too Many Requests",
+            text2: "Please wait a few minutes before trying again."
+        });
+  } else {
+    console.error(err);
+  }
+        if (err instanceof Error) {
+        Toast.show({
+        type: 'error',
+        text1: 'Error Signing up',
+        text2: err.message
+        });  
+        }
       console.error(JSON.stringify(err, null, 2))
     }
   }
 
   if (pendingVerification) {
     return (
-      <>
-        <Text>Verify your email</Text>
-        <TextInput
-          value={code}
-          placeholder="Enter your verification code"
-          onChangeText={(code) => setCode(code)}
-        />
-        <TouchableOpacity onPress={onVerifyPress}>
-          <Text>Verify</Text>
-        </TouchableOpacity>
-      </>
+       <EmailVerification
+       code={code} 
+       setCode={setCode} 
+       onVerifyPress={onVerifyPress} />
     )
   }
 
+    const password = watch("password", "");
+
   return (
     <KeyboardAvoidingView 
-    behavior={Platform.OS === "ios" ? "padding" : undefined}
+    behavior={Platform.OS === "ios" ? "padding" : 'height'}
     style={[styles.container, { backgroundColor: theme.background }]}>
 
       <View style={styles.inner}>
 
-        <Images color='#e1306c' size={60} style={styles.logo}/>
+        <View style={{ marginBottom: 70 }}>
+            <Logo />
+        </View>
 
-         <Input 
-        value={emailAddress} 
-        setValue={setEmailAddress}
-        placeholder='Enter Email Address'
+        <Controller
+        control={control}
+        name="username"
+        rules={{ required: "Username is required" }}
+        render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+            value={value} 
+            setValue={onChange}
+            placeholder='Enter your username'
+            />
+        )}
         />
+         {errors.username?.message && (
+          <Text style={styles.errorText}>{errors.username.message.toString()}</Text>
+        )}
 
-        <Input 
-        value={password} 
-        setValue={setPassword}
-        placeholder='Enter Password'
+        <Controller
+        control={control}
+        name="emailAddress"
+        rules={{
+            required: "Email is required",
+            pattern: {
+              value: /^\S+@\S+$/i,
+              message: "Invalid email format",
+            },
+          }}
+        render={({ field: { onChange, onBlur, value } }) => (
+            <Input 
+            value={value} 
+            setValue={onChange}
+            placeholder='Enter Email Address'
+            />
+        )}
         />
+         {errors.emailAddress?.message && (
+          <Text style={styles.errorText}>{errors.emailAddress.message.toString()}</Text>
+        )}  
+
+        {/* password */}
+        <Controller
+        control={control}
+        name="password"
+        rules={{
+            required: "Password is required",
+            pattern: {
+              value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+              message: "Must contain 8+ chars with letters & numbers",
+            },
+          }}
+        render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+            secureTextEntry
+            value={value} 
+            setValue={onChange}
+            placeholder='Enter Password '
+            />
+        )}
+        />
+        {errors.password && (
+          <Text style={styles.errorText}>{errors.password.message}</Text>
+        )}
+
         {/* confirm password */}
-        <Input 
-        value={password} 
-        setValue={setPassword}
-        placeholder='Confirm Password'
+         <Controller
+          control={control}
+          name="confirmPassword"
+          rules={{
+            required: "Please confirm your password",
+            validate: (value) => {
+              return value === password || "Passwords do not match";
+            }
+          }}
+          render={({ field: { onChange, value } }) => (
+            <Input
+              placeholder="Confirm Password"
+              secureTextEntry
+              value={value}
+              setValue={onChange}
+            />
+          )}
         />
+        {errors.confirmPassword && (
+          <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+        )}
 
         <TouchableOpacity 
         style={[styles.button, { backgroundColor: 'rgb(42, 98, 216)' }]}
-        onPress={onSignUpPress}>
-            {loading ? (
+        disabled={isSubmitting}
+        onPress={handleSubmit(onSignUpPress)}>
+            {isSubmitting ? (
                 <ActivityIndicator color="#fff" />
                 ) : (
                 <Text style={styles.buttonText}>Sign Up</Text>
                 )}
         </TouchableOpacity>
+
+        {/* <GoogleOneTap /> */}
 
         {/* Signup Link */}
         <View style={styles.signupContainer}>
@@ -152,6 +247,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  inputCode: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 16,
+  },
   inner: {
     width: "100%",
     maxWidth: 400,
@@ -160,6 +260,21 @@ const styles = StyleSheet.create({
   },
   logo: {
     marginBottom: 70,
+  },
+    errorText: {
+    color: 'red',
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+    fontSize: 12,
+  },
+  inputContainer: {
+    width: "100%",
+    borderWidth: 1,
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    marginBottom: 20,
   },
   button: {
     width: "100%",

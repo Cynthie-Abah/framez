@@ -3,30 +3,31 @@ import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { Pacifico_400Regular, useFonts } from "@expo-google-fonts/pacifico";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { ConvexReactClient } from "convex/react";
+import { Authenticated, ConvexReactClient, Unauthenticated, useConvexAuth } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Redirect, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native";
 import "react-native-reanimated";
-
-// ✅ Convex client setup
+import Toast from 'react-native-toast-message';
+//  const messages = useQuery(api.messages.getForCurrentUser); //how to get stuff for user
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
 });
-const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
+const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   function RootNavigator() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isLoading, isAuthenticated } = useConvexAuth();
 
-  if (!isLoaded) return <Redirect href="/" />;
-
-  if (isSignedIn) return <Redirect href="/(tabs)/feed" />;
+  if (isLoading) return <Redirect href="/" />;
+  if (isAuthenticated) return <Redirect href="/(tabs)/feed" />;
   return <Redirect href="/(auth)/login" />;
 }
+
+
 
   const [fontsLoaded] = useFonts({
     Pacifico_400Regular,
@@ -41,10 +42,20 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
             {/* Auth Screens */}
-            <Stack.Screen name="(auth)/login" />
-            <Stack.Screen name="(auth)/signup" />
-            {/* Protected Screens */}
+            <Unauthenticated>
+              <Stack.Screen name="(auth)/login" />
+              <Stack.Screen name="(auth)/signup" />
+            </Unauthenticated>
+            
             <Stack.Screen name="index" />
+            {/* App Screens */}
+            <Authenticated>
+              <Stack.Screen name="(tabs)/_layout" />
+              <Stack.Screen name="(tabs)/feed" />
+              <Stack.Screen name="(tabs)/create-post" />
+              {/* <Stack.Screen name="(tabs)/profile/[userId]" /> */}
+              <Stack.Screen name="(tabs)/user-profile" />
+            </Authenticated>
           </Stack>
 
           {/* Handle redirection */}
@@ -54,6 +65,7 @@ export default function RootLayout() {
       </ThemeProvider>
       
     </ConvexProviderWithClerk>
+    <Toast />
     </ClerkProvider>
   );
 }

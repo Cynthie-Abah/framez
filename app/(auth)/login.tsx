@@ -1,9 +1,10 @@
 import Input from '@/components/ui/input';
+import Logo from '@/components/ui/logo';
 import { Colors } from '@/constants/theme';
 import { useSignIn } from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
-import { Images } from 'lucide-react-native';
-import React, { useState } from "react";
+import React from "react";
+import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -14,63 +15,107 @@ import {
     useColorScheme,
     View
 } from "react-native";
+import Toast from 'react-native-toast-message';
+
+type LoginForm = {
+  emailAddress: string
+  password: string
+}
 
 const LoginScreen = () => {
+
   const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
 
-  const handleLogin = async () => {
+  const {control, handleSubmit, formState: {errors, isSubmitting}} = useForm<LoginForm>();
+
+  const handleLogin = async ({emailAddress, password}: LoginForm) => {
     if (!isLoaded) return;
-    setLoading(true);
     try {
-      const signInAttempt = await signIn.create({ identifier: email, password });
+      const signInAttempt = await signIn.create({ identifier: emailAddress, password });
 
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId });
-        router.replace('/feed');
+            router.replace('/feed');
+            return;
       } else {
+       
+            Toast.show({
+            type: 'error',
+            text1: 'Unknown error occurred during sign-in',
+            });  
+                
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(JSON.stringify(err, null, 2));
-    } finally {
-      setLoading(false);
+      if (err instanceof Error) {
+        
+    Toast.show({
+        type: 'error',
+        text1: 'Error occurred during sign-in',
+        text2: err.message ?? 'Unknown error occurred during sign-in'
+       } );
+      console.log(err instanceof Error ? err.message : 'Unknown error occurred during sign-in');
+      }
+      
     }
   }
 
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: theme.background }]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : 'height'}
     >
       <View style={styles.inner}>
         {/* Logo */}
-        <Images color='#e1306c' size={60} style={styles.logo}/>
+        <View style={{ marginBottom: 70 }}>
+            <Logo />
+        </View>
 
-        {/* Input Fields */}
+        {/* email */}
+         <Controller
+        control={control}
+        name="emailAddress"
+        rules={{ required: "Email is required" }}
+        render={({ field: { onChange, value } }) => (
         <Input 
-          value={email} 
-          setValue={setEmail}
+          value={value} 
+          setValue={onChange}
           placeholder="Email or Username" 
         />
-        <Input 
-          value={password} 
-          setValue={setPassword}
-          placeholder="Password"
+         )}
         />
+            {errors.emailAddress?.message && (
+            <Text style={styles.errorText}>{errors.emailAddress.message.toString()}</Text>
+        )}
+
+        {/* password */}
+         <Controller
+        control={control}
+        name="password"
+        rules={{ required: "Password is required" }}
+        render={({ field: { onChange, value } }) => (
+        <Input 
+          value={value} 
+          setValue={onChange}
+          placeholder="Enter Password"
+        />
+         )}
+        />
+        {errors.password?.message && (
+        <Text style={styles.errorText}>{errors.password.message.toString()}</Text>
+        )}
 
         {/* Login Button */}
         <TouchableOpacity 
           style={[styles.button, { backgroundColor: 'rgb(42, 98, 216)' }]} 
-          onPress={handleLogin} 
-          disabled={loading}
+          onPress={handleSubmit(handleLogin)} 
+          disabled={isSubmitting}
         >
-          {loading ? (
+          {isSubmitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.buttonText}>Log In</Text>
@@ -114,6 +159,12 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: "center",
     marginVertical: 10,
+  },
+   errorText: {
+    color: 'red',
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+    fontSize: 12,
   },
   buttonText: {
     color: "#fff",

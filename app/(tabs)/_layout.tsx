@@ -1,14 +1,41 @@
+import { api } from '@/convex/_generated/api';
+import useAuthStore from '@/store';
+import { useUser } from '@clerk/clerk-expo';
+import { useMutation } from 'convex/react';
 import { Tabs } from 'expo-router';
 import { Home, Plus, User } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { HapticTab } from '../../components/haptic-tab';
 import { Colors } from '../../constants/theme';
 
-
 export default function TabLayout() {
+    const {createUserOnServer} = useAuthStore();
+    const {user} = useUser();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light; 
+  const createUser = useMutation(api.users.createUser);
+
+  useEffect(() => {
+  if (!user) return;
+
+  createUserOnServer({
+    id: user.id,
+    email: user.emailAddresses[0].emailAddress,
+    avatar: '',
+    username: user.username || '',
+  },
+    async (payload) => {
+    await createUser({
+    clerkId: payload.clerkId,
+    email: user.emailAddresses[0].emailAddress,
+    avatar: '',
+    username: payload.username || '',
+    followers: [],
+    following: [],
+  }); 
+  });
+}, [user]);
 
   return (
     <Tabs
