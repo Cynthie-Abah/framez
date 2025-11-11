@@ -1,4 +1,5 @@
 import { api } from '@/convex/_generated/api';
+import { useConvexUser } from '@/hooks/use-convex-user';
 import useAuthStore from '@/store';
 import { useUser } from '@clerk/clerk-expo';
 import { useMutation } from 'convex/react';
@@ -10,32 +11,38 @@ import { HapticTab } from '../../components/haptic-tab';
 import { Colors } from '../../constants/theme';
 
 export default function TabLayout() {
-    const {createUserOnServer} = useAuthStore();
-    const {user, isSignedIn} = useUser();
+    const {setUser} = useAuthStore();
+    const {user: clerkUser, isSignedIn} = useUser();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light; 
   const createUser = useMutation(api.users.createUser);
+  const { user: convexUser, isLoading, error } = useConvexUser(clerkUser?.id);
 
   useEffect(() => {
-  if (!user && !isSignedIn ) return;
+    if (!clerkUser || !isSignedIn) return;
 
-  createUserOnServer({
-    id: user.id,
-    email: user.emailAddresses[0].emailAddress,
-    avatar: '',
-    username: user.username || '',
-  },
-    async (payload) => {
-    await createUser({
-    clerkId: payload.clerkId,
-    email: user.emailAddresses[0].emailAddress,
-    avatar: '',
-    username: payload.username || '',
-    followers: [],
-    following: [],
-  }); 
-  });
-}, [user]);
+    const syncUser = async () => {
+      const email =
+        (clerkUser as any).emailAddresses?.[0]?.emailAddress ??
+        (clerkUser as any).primaryEmailAddress ??
+        '';
+
+      await createUser({
+        clerkId: clerkUser.id,
+        email,
+        avatar: (clerkUser as any).imageUrl ?? '',
+        username: clerkUser.username ?? '',
+        followers: [],
+        following: [],
+      });
+
+      if (!isLoading && convexUser) {
+        setUser(convexUser);
+      }
+    };
+
+    syncUser();
+  }, [clerkUser, isSignedIn, convexUser, isLoading]);
 
   return (
     <Tabs

@@ -19,7 +19,7 @@ export default defineSchema({
     }),
     posts: defineTable({
         authorId: v.id("users"),
-        authorName: v.string(),
+        email: v.string(),
         userName: v.string(),        
         userAvatar: v.string(),  
         image: v.array(v.string()),

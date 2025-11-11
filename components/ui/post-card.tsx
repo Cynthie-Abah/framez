@@ -1,8 +1,12 @@
 import { Colors } from '@/constants/theme';
+import { Id } from '@/convex/_generated/dataModel';
+import { useToggleLike } from '@/hooks/use-like-post';
+import useAuthStore from '@/store';
 import { Post } from '@/type';
+import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';
 import { Ellipsis, Heart, MessageCircle } from 'lucide-react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Dimensions,
     ScrollView,
@@ -16,8 +20,20 @@ import {
 const screenWidth = Dimensions.get('window').width;
 
 export default function PostCard({item}: {item: Post}) {
+    const [openComment, setOpenComment] = useState();
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+    const {toggleLike} = useToggleLike();
+    const {user} = useAuthStore();
+
+    const isLiked = item.likes.find((like)=> like.userId  === user?._id )
+
+    const handleLikeToggle = ()=>{
+        if (user) {
+            toggleLike(item._id, user?._id as Id<"users">)
+        }
+        
+    }
 
   return (
      <View style={[styles.postContainer]}>
@@ -27,11 +43,13 @@ export default function PostCard({item}: {item: Post}) {
     
             <TouchableOpacity style={styles.postHeader}>
     
-                <Image source={{ uri: item.userAvatar }} style={styles.avatar} />
+                <Image source={{ 
+                    uri: item.userAvatar || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'
+                      }} style={styles.avatar} />
     
                 <View style={{gap: 4}}>
                     <Text style={[styles.username, { color: theme.text }]}>{item.userName}</Text>
-                    <Text style={[styles.username, { color: theme.placeholder }]}>cynthia@gmail.com</Text>
+                    <Text style={[styles.username, { color: theme.placeholder }]}>{item.email}</Text>
                 </View>
             </TouchableOpacity>
     
@@ -65,9 +83,9 @@ export default function PostCard({item}: {item: Post}) {
           {/* Post actions */}
           <View style={styles.postActions}>
             {/* likes */}
-            <TouchableOpacity style={{ marginRight: 16 }}>
+            <TouchableOpacity onPress={handleLikeToggle} style={{ marginRight: 16 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Heart color={theme.text} size={27} strokeWidth={2.5}/> 
+                <Heart color={theme.text} size={27} strokeWidth={isLiked ? 0 : 2.5} fill={isLiked && 'red'} /> 
                 <Text style={{ color: theme.text }}>{item.likes.length}</Text></View>
             </TouchableOpacity>
             
@@ -83,7 +101,7 @@ export default function PostCard({item}: {item: Post}) {
           <Text style={[styles.caption, { color: theme.text }]}>{item.text}</Text>
     
           {/* Post time */}
-          <Text style={[styles.caption, { color: theme.placeholder }]}>11 hours ago</Text>
+          <Text style={[styles.caption, { color: theme.placeholder }]}>{formatTimeAgo(item._creationTime)}</Text>
         </View>
   )
 }

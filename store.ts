@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import type { clerkUser } from './type';
+import type { Post, user } from './type';
 
 type CreateUserFn = (payload: {
     clerkId: string;
@@ -13,9 +13,8 @@ type CreateUserFn = (payload: {
 
 interface AuthState {
     isAuthenticated: boolean;
-    user: clerkUser | null;
-    setUser: (user: clerkUser) => void;
-    createUserOnServer: (user: clerkUser, createUserFn: CreateUserFn) => void;
+    user: user | null;
+    setUser: (user: user) => void;
     login: () => void;
     signup: () => void;
     logout: () => void;
@@ -27,20 +26,6 @@ const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       user: null,
       setUser: (user) => set({ isAuthenticated: true, user }),
-      createUserOnServer: (user, createUserFn) => {
-        set({ isAuthenticated: true, user });
-        try {
-           createUserFn({
-            clerkId: user.id,
-            email: user.email ?? null,
-            username: user.username ?? null,
-            followers: [],
-            following: [],
-          });
-        } catch (err) {
-          console.error('createUser failed', err);
-        }
-      },
       login: () => set({ isAuthenticated: true }),
       signup: () => set({ isAuthenticated: true }),
       logout: () => set({ isAuthenticated: false, user: null }),
@@ -53,7 +38,7 @@ const useAuthStore = create<AuthState>()(
 );
 
 interface PostState {
-  posts: any[];
+  posts: Post[];
   setPosts: (posts: any[]) => void;
   loading: boolean;
   error: string | null;

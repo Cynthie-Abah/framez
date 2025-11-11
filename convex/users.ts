@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
+// CREATE - Create new users - CONSUMED
 export const createUser = mutation({
   args: {
         clerkId: v.string(),
@@ -40,5 +41,25 @@ export const createUser = mutation({
     return { success: true, id: cart, message: "Cart created successfully" };
       }
 
+  },
+});
+// READ - Get a user info
+export const getUserById = query({
+  args: { userId: v.string() },
+  handler: async ({ db }, { userId }) => {
+    const user = await db
+      .query("users")
+      .filter((q) => q.eq(q.field("clerkId"), userId))
+      .first();
+    return user;
+  },
+});
+
+export const getAllUsers = query({
+  handler: async ({db}) => {
+    const posts = await db
+      .query("users")
+      .collect();
+    return posts;
   },
 });

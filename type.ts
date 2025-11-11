@@ -23,14 +23,30 @@ export interface clerkUser {
     email: string;
     avatar?: string;
 }
+export interface user {
+    _id: string;
+    username: string;
+    email: string;
+    avatar?: string;
+    followers: {
+        userId: Id<"users">;
+        username: string;
+        avatar: string;
+    }[];
+    following: {
+        userId: Id<"users">;
+        username: string;
+        avatar: string;
+    }[];
+}
 
 export interface Like {
-  userId: string;
+  userId: Id<'users'>;
   timeStamp: number;
 }
 
 export interface Comment {
-  userId: string;
+  userId: Id<'users'>;
   userName: string;
   userAvatar: string;
   text: string;
@@ -38,13 +54,14 @@ export interface Comment {
 }
 
 export interface Post {
-  _id: string;
+  _id: Id<"posts">;
   authorId: string;
-  authorName: string;
+  email: string
   userName: string;
   userAvatar: string;
   image: string[];
   text: string;
   likes: Like[];
   comments: Comment[];
+  _creationTime: number
 }
