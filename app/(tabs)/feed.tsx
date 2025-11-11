@@ -4,11 +4,14 @@ import { Colors, defaultAvatar } from '@/constants/theme';
 import { usePosts } from '@/hooks/use-posts';
 import useAuthStore from '@/store';
 import { Post } from '@/type';
+import { useIsFocused } from '@react-navigation/native';
 import { Image } from 'expo-image';
-import React from 'react';
+import { useNavigation } from 'expo-router';
+import React, { useEffect, useRef } from 'react';
 import {
     ActivityIndicator,
     FlatList,
+    ScrollView,
     StyleSheet,
     Text,
     useColorScheme,
@@ -20,6 +23,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
     const colorScheme = useColorScheme();
     const {user, isAuthenticated} = useAuthStore();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+    const navigation = useNavigation();
+     const isFocused = useIsFocused();
+     const scrollRef = useRef<ScrollView>(null);
+
+       useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress' as any, (e: any) => {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+      console.log("Tab re-tapped → scrolled to top");
+    });
+
+    return unsubscribe;
+  }, [navigation, isFocused]);
+
+
 
     const renderPost = ({ item }: {item: Post}) => (
     <PostCard item={item} />

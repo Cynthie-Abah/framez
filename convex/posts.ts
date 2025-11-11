@@ -116,6 +116,61 @@ export const updateComments = mutation({
 // delete a post - delete
 
 // follow/unfollow a user - update
+export const updateFollow = mutation({
+  args: {
+    id: v.id("users"),
+    userId: v.id("users"),
+    username: v.string(),
+    avatar: v.string(),
+  },
+  handler: async ({ db }, { id, userId, username, avatar }: {
+    id: Id<"users">, 
+    userId: Id<"users">, 
+    username: string,
+    avatar: string,
+  }) => {
+    const user = await db.get(id);
+    const followee = await db.get(userId)
+    // console.log('user', id, 'followee', userId);
+    
+    if (!user || !followee) return { success: false, message: "User not found" };
+
+    const existingFollowing = user.following;
+    const alreadyFollowing = existingFollowing.find(following => following.userId === userId);
+
+    const existingFollowers = followee.followers;
+    const alreadyFollowers = existingFollowers.find(followers => followers.userId === id);
+
+    let updatedFollowing;
+    let updatedFollowers;
+    if (alreadyFollowing) {
+      updatedFollowing = existingFollowing.filter(following => following.userId !== userId);
+    } else {
+      const newFollowing = { 
+        userId: userId as Id<'users'>, 
+        username,
+        avatar
+        
+      };
+      updatedFollowing = [...existingFollowing, newFollowing];
+    }
+
+    if (alreadyFollowers) {
+       updatedFollowers = existingFollowers.filter(followers => followers.userId !== id)
+    } else {
+      const newFollower = { 
+        userId: id as Id<'users'>, 
+        username: user.username || '',
+        avatar: user.avatar || ''
+      };
+      updatedFollowers = [...existingFollowers, newFollower]
+    }
+
+    await db.patch(id, { following: updatedFollowing });
+    await db.patch(userId, { followers: updatedFollowers });
+    return { success: true, message: alreadyFollowing ? `You unfollowed ${username}` : `You followed ${username}` };
+  },
+});
 
 // fetch user profile data - read
 

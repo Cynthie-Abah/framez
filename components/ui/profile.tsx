@@ -1,6 +1,8 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
+import { useToggleFollow } from '@/hooks/use-follow';
 import { useUserProfile } from '@/hooks/use-user-profile';
+import useAuthStore from '@/store';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -13,6 +15,22 @@ const Profile = ({type, userId}: {type: 'user' | 'others', userId: string}) => {
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const {userProfile, error, isLoading} = useUserProfile(userId as Id<"users">)
   const router = useRouter();
+  const { toggleFollow, isLoading: isFollowing} = useToggleFollow();
+  const {user} = useAuthStore();
+  
+  const handleFollow =()=> {
+      const details = {
+          userId: userId as Id<"users">, 
+          username: userProfile.username || '',
+          avatar: userProfile.avatar || ''
+      }
+      toggleFollow(details)
+    }
+
+    const alreadyFollowing = !!userProfile.followers?.some(
+  f => f.userId.toString() === user?._id.toString()
+);
+    
 
 if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}><ActivityIndicator /></SafeAreaView>
   return (
@@ -75,8 +93,13 @@ if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: 
         // Follow and Message buttons
       <View style={styles.actionButtons}>
 
-        <TouchableOpacity style={[styles.button, { backgroundColor: theme.tint }]}>
-          <Text style={styles.buttonText}>Follow</Text>
+        <TouchableOpacity disabled={isFollowing} onPress={handleFollow} style={[styles.button, { backgroundColor: theme.tint }]}>
+          {
+            isFollowing ? 
+            <ActivityIndicator /> :
+            <Text style={styles.buttonText}>{alreadyFollowing ? "Unfollow" : 'Follow'}</Text>
+          }
+          
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, { backgroundColor: theme.tabIconDefault }]}>

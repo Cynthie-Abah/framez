@@ -18,6 +18,19 @@ export default function TabLayout() {
   const createUser = useMutation(api.users.createUser);
   const { user: convexUser, isLoading, error } = useConvexUser(clerkUser?.id);
 
+  // const handleTabPress = useCallback(({ navigation, route }) => ({
+  //   tabPress: (e) => {
+  //     if (navigation.isFocused() && route.name === 'nameOfYourTabScreen') {
+  //       console.log('Active tab tapped again in layout. Reloading...');
+  //       const scrollToTop = navigation.getParam('scrollToTop'); 
+  //     if (scrollToTop) {
+  //       scrollToTop();
+  //     }
+
+  //     }
+  //   },
+  // }), []);
+
   useEffect(() => {
     if (!clerkUser || !isSignedIn) return;
 
@@ -69,6 +82,8 @@ export default function TabLayout() {
           title: 'feed',
           tabBarIcon: ({ color, focused }) => <Home strokeWidth={3} size={28} color={color} />,
         }}
+        // listeners={ha}
+        
 //         listeners={({ navigation, route }) => ({
 //     tabPress: (e) => {
 //       const state = navigation.getState();
