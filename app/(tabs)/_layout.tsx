@@ -11,13 +11,13 @@ import { Colors } from '../../constants/theme';
 
 export default function TabLayout() {
     const {createUserOnServer} = useAuthStore();
-    const {user} = useUser();
+    const {user, isSignedIn} = useUser();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light; 
   const createUser = useMutation(api.users.createUser);
 
   useEffect(() => {
-  if (!user) return;
+  if (!user && !isSignedIn ) return;
 
   createUserOnServer({
     id: user.id,

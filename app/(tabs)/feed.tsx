@@ -1,7 +1,9 @@
 import Menu from '@/components/ui/Menu';
 import PostCard from '@/components/ui/post-card';
 import { Colors } from '@/constants/theme';
+import { usePosts } from '@/hooks/use-posts';
 import useAuthStore from '@/store';
+import { Post } from '@/type';
 import { Image } from 'expo-image';
 import React from 'react';
 import {
@@ -14,59 +16,32 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const dummyPosts = [
-  {
-    id: '1',
-    username: 'johndoe',
-    avatar: 'https://i.pravatar.cc/150?img=1',
-    image: 'https://picsum.photos/id/237/1080/1360',
-    caption: 'Enjoying this beautiful view! 😍',
-    likes: 120,
-  },
-  {
-    id: '2',
-    username: 'janedoe',
-    avatar: 'https://i.pravatar.cc/150?img=2',
-    image: 'https://picsum.photos/1080/1360',
-    caption: 'Cute kittens make everything better 🐱',
-    likes: 200,
-  },
-   {
-    id: '3',
-    username: 'johndoe',
-    avatar: 'https://i.pravatar.cc/150?img=1',
-    image: 'https://picsum.photos/id/297/1080/1360',
-    caption: 'Enjoying this beautiful view! 😍',
-    likes: 120,
-  },
-  {
-    id: '4',
-    username: 'janedoe',
-    avatar: 'https://i.pravatar.cc/150?img=2',
-    image: 'https://picsum.photos/1080/1360',
-    caption: 'Cute kittens make everything better 🐱',
-    likes: 200,
-  },
-];
     const Feed = () => {
     const colorScheme = useColorScheme();
+    const {user, isAuthenticated} = useAuthStore();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-    // use interface for post item
-    const renderPost = ({ item }: any) => (
+
+    const renderPost = ({ item }: {item: Post}) => (
     <PostCard item={item} />
     );
 
-     const {user, isAuthenticated} = useAuthStore();
+    const {posts, error, isLoading} = usePosts();
 
-     if (!user && !isAuthenticated) {
+     if ((!user && !isAuthenticated ) || isLoading) {
         return <SafeAreaView style={{ flex: 1, backgroundColor: theme.feedBackground }}><ActivityIndicator /></SafeAreaView>
      }
-    console.log(user, 'user data');
+     if (error) {
+        return <SafeAreaView style={{ 
+            flex: 1, 
+            backgroundColor: theme.feedBackground, 
+            justifyContent: 'center', 
+            alignItems: 'center' }}>Error loading products.</SafeAreaView>
+     }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.feedBackground }}>
             <FlatList
-        data={dummyPosts}
-        keyExtractor={(item) => item.id}
+        data={posts}
+        keyExtractor={(item) => item._id}
         ListHeaderComponent={
             <View style={[styles.headerContainer]}>
             <Image

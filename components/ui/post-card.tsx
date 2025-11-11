@@ -1,16 +1,21 @@
 import { Colors } from '@/constants/theme';
+import { Post } from '@/type';
 import { Image } from 'expo-image';
 import { Ellipsis, Heart, MessageCircle } from 'lucide-react-native';
 import React from 'react';
 import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    View
 } from 'react-native';
-// create a typescript interface for the post props
-export default function PostCard({item}: any) {
+
+const screenWidth = Dimensions.get('window').width;
+
+export default function PostCard({item}: {item: Post}) {
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
 
@@ -22,10 +27,10 @@ export default function PostCard({item}: any) {
     
             <TouchableOpacity style={styles.postHeader}>
     
-                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                <Image source={{ uri: item.userAvatar }} style={styles.avatar} />
     
                 <View style={{gap: 4}}>
-                    <Text style={[styles.username, { color: theme.text }]}>{item.username}</Text>
+                    <Text style={[styles.username, { color: theme.text }]}>{item.userName}</Text>
                     <Text style={[styles.username, { color: theme.placeholder }]}>cynthia@gmail.com</Text>
                 </View>
             </TouchableOpacity>
@@ -37,14 +42,25 @@ export default function PostCard({item}: any) {
           </View>
     
           {/* Post image */}
-            <Image 
-            source={{ uri: item.image }} 
-            style={styles.postImage}
-            contentFit="cover"
-            cachePolicy="memory-disk"
-            priority="high"
-            transition={300}
-                />
+            <ScrollView 
+            horizontal={true} 
+            showsHorizontalScrollIndicator
+            pagingEnabled
+            style={{ height: 400 }}
+            contentContainerStyle={{ gap: 8 }}
+            >
+                {item.image.map((image, index)=> 
+                <Image
+                key={image + index} 
+                source={{ uri: image }} 
+                style={styles.postImage}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                priority="high"
+                transition={300}
+                    />
+                    )}
+            </ScrollView>
     
           {/* Post actions */}
           <View style={styles.postActions}>
@@ -52,19 +68,19 @@ export default function PostCard({item}: any) {
             <TouchableOpacity style={{ marginRight: 16 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Heart color={theme.text} size={27} strokeWidth={2.5}/> 
-                <Text style={{ color: theme.text }}>{item.likes}</Text></View>
+                <Text style={{ color: theme.text }}>{item.likes.length}</Text></View>
             </TouchableOpacity>
             
                 {/* comments */}
             <TouchableOpacity style={{ marginRight: 16 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <MessageCircle color={theme.text} size={27} strokeWidth={2.5}/> 
-                <Text style={{ color: theme.text }}>{item.likes}</Text></View>
+                <Text style={{ color: theme.text }}>{item.comments.length}</Text></View>
             </TouchableOpacity>
           </View>
     
           {/* Post caption */}
-          <Text style={[styles.caption, { color: theme.text }]}>{item.caption}</Text>
+          <Text style={[styles.caption, { color: theme.text }]}>{item.text}</Text>
     
           {/* Post time */}
           <Text style={[styles.caption, { color: theme.placeholder }]}>11 hours ago</Text>
@@ -82,7 +98,7 @@ export default function PostCard({item}: any) {
     postContainer: {
         marginBottom: 24,
         borderRadius: 10,
-        overflow: 'hidden',
+        flex: 1,
     },
     postHeader: {
         flexDirection: 'row',
@@ -100,8 +116,7 @@ export default function PostCard({item}: any) {
         textTransform: 'capitalize',
     },
     postImage: {
-        width: '100%',
-        height: 400,
+        width: screenWidth,
         resizeMode: 'cover',
     },
     postActions: {
