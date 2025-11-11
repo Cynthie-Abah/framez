@@ -1,130 +1,197 @@
-import { Colors } from '@/constants/theme';
-import { Camera } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from "@/constants/theme";
+import { Id } from "@/convex/_generated/dataModel";
+import { useCreatePost } from "@/hooks/use-create-post";
+import useAuthStore from "@/store";
+import * as ImagePicker from "expo-image-picker";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const CreatePost = () => {
+export default function CreatePost() {
+  const { user } = useAuthStore();
+  const [images, setImages] = useState<string[]>([]);
+  const [caption, setCaption] = useState("");
   const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-  const [postText, setPostText] = useState('');
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
+  const {handleCreatePost, isloading} = useCreatePost();
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}>
-      {/* Image preview */}
-      <TouchableOpacity style={[styles.imagePlaceholder, { borderColor: theme.icon }]}>
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.image} />
-        ) : (
-          <Camera color={theme.icon} size={50} />
-        )}
-      </TouchableOpacity>
+  const pickImages = async () => {
+  Alert.alert(
+    "Add Photo",
+    "Choose an option",
+    [
+      {
+        text: "Take Photo",
+        onPress: async () => {
+          const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+          if (cameraPermission.status !== "granted") {
+            alert("Camera permission is required!");
+            return;
+          }
 
-      {/* Post input */}
-      <TextInput
-        style={[styles.input, { color: theme.text, borderColor: theme.icon }]}
-        placeholder="Write a caption..."
-        placeholderTextColor={theme.placeholder}
-        value={postText}
-        onChangeText={setPostText}
-        multiline
-      />
+          const result = await ImagePicker.launchCameraAsync({
+            quality: 0.8,
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          });
 
-      {/* Share button */}
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: theme.tint }]}
-        onPress={() => console.log('Post shared!')}
-      >
-        <Text style={[styles.buttonText]}>Share</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+          if (!result.canceled) {
+            const uri = result.assets[0].uri;
+            setImages((prev) => [...prev, uri]);
+          }
+        },
+      },
+      {
+        text: "Choose from Gallery",
+        onPress: async () => {
+          const galleryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (galleryPermission.status !== "granted") {
+            alert("Media library permission is required!");
+            return;
+          }
+
+          const result = await ImagePicker.launchImageLibraryAsync({
+            allowsMultipleSelection: true,
+            quality: 0.8,
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          });
+
+          if (!result.canceled) {
+            const uris = result.assets.map((a) => a.uri);
+            setImages((prev) => [...prev, ...uris]);
+          }
+        },
+      },
+      { text: "Cancel", style: "cancel" },
+    ],
+    { cancelable: true }
   );
 };
 
-export default CreatePost;
+  const handlePost = async () => {
+    if (!caption && images.length === 0 && !user) return;
+
+    const newPost = {
+    authorId: user?._id as Id<"users"> || '' as Id<"users">,
+    text: caption,
+    image: images,
+    email: user?.email || '',
+    userName: user?.username || '',
+    userAvatar: user?.avatar || '',
+  };
+
+  handleCreatePost(newPost);
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}>
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: 60 }}
+    >
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: theme.text, fontFamily: 'Pacifico_400Regular'}]}>New Post</Text>
+      </View>
+
+      <View style={{ width: '100%', maxWidth: 400, alignItems: 'center' }}>
+        <TouchableOpacity style={[styles.addImageBox, {borderColor: theme.ashButton}]} onPress={pickImages}>
+          <Text style={{ color: theme.icon }}>
+            {images.length > 0 ? "Add more photos" : "Select photos"}
+          </Text>
+        </TouchableOpacity>
+
+        {images.length > 0 && (
+          <ScrollView style={{marginBottom: 16}} horizontal showsHorizontalScrollIndicator={false}>
+            {images.map((uri, i) => (
+              <Image key={i} source={{ uri }} style={styles.imagePreview} />
+            ))}
+          </ScrollView>
+        )}
+
+        <TextInput
+          placeholder="Write a caption..."
+          placeholderTextColor={theme.ashButton}
+          value={caption}
+          onChangeText={setCaption}
+          multiline
+          style={[styles.captionInput, { color: theme.text, borderColor: theme.border, marginBottom: 30 }]}
+        />
+
+        <TouchableOpacity
+            onPress={handlePost}
+            disabled={isloading}
+            style={[styles.postButton, { opacity: isloading ? 0.6 : 1 , width: '100%', marginHorizontal: 'auto'}]}
+          >
+            {isloading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={[styles.postText, {textAlign: 'center'}]}>Post</Text>
+            )}
+          </TouchableOpacity>
+      </View>
+    </ScrollView>
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
-  imagePlaceholder: {
-    width: '100%',
-    height: 200,
-    borderWidth: 2,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: "700",
+  },
+  postButton: {
+    backgroundColor: "#0095f6",
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  postText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 18,
+  },
+  addImageBox: {
+    borderWidth: 1,
+    borderStyle: "dashed",
     borderRadius: 12,
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 120,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
+    width: '100%'
   },
-  image: {
-    width: '100%',
-    height: '100%',
+  imagePreview: {
+    width: 120,
+    height: 120,
     borderRadius: 12,
+    marginRight: 10,
   },
-  input: {
-    width: '100%',
-    minHeight: 80,
+  captionInput: {
     borderWidth: 1,
     borderRadius: 12,
     padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-    textAlignVertical: 'top',
-  },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 25,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+    fontSize: 15,
+    minHeight: 120,
+    width: '100%'
   },
 });
-
-
-// import { Alert, Pressable, Text, View } from "react-native";
-
-// import { useImageUploader } from "../../utils/uploadthing";
-
-// export function MultiUploader() {
-//   const { openImagePicker, isUploading } = useImageUploader("imageUploader", {
-//     /**
-//      * Any props here are forwarded to the underlying `useUploadThing` hook.
-//      * Refer to the React API reference for more info.
-//      */
-//     onClientUploadComplete: () => Alert.alert("Upload Completed"),
-//     onUploadError: (error: any) => Alert.alert("Upload Error", error.message),
-//   });
-
-//   return (
-//     <View>
-//       <Pressable
-//         onPress={() => {
-//           openImagePicker({
-//             oninput, // Matches the input schema from the FileRouter endpoint
-//             source: "library", // or "camera"
-//             onInsufficientPermissions: () => {
-//               Alert.alert(
-//                 "No Permissions",
-//                 "You need to grant permission to your Photos to use this",
-//                 [
-//                   { text: "Dismiss" },
-//                   { text: "Open Settings", onPress: openSettings },
-//                 ],
-//               );
-//             },
-//           });
-//         }}
-//       >
-//         <Text>Select Image</Text>
-//       </Pressable>
-//     </View>
-//   );
-// }

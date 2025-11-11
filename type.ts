@@ -56,7 +56,7 @@ export interface Comment {
 
 export interface Post {
   _id: Id<"posts">;
-  authorId: string;
+  authorId: Id<'users'>;
   email: string
   userName: string;
   userAvatar: string;
@@ -66,3 +66,18 @@ export interface Post {
   comments: Comment[];
   _creationTime: number
 }
+
+export interface newPost {
+  authorId: Id<'users'>;
+  email: string
+  userName: string;
+  userAvatar: string;
+  image: string[];
+  text: string;
+}
+
+// Argument of type 'newPost' is not assignable to parameter of type '{ email: string; authorId: Id<"users">; userName: string; userAvatar: string; image: string[]; text: string; }'.
+//   Types of property 'authorId' are incompatible.
+//     Type 'string' is not assignable to type 'Id<"users">'.
+//       Type 'string' is not assignable to type '{ __tableName: "users"; }'.ts(2345)
+// (parameter) post: newPost
