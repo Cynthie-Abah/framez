@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 const instagramGradientStart = "#f58529"; 
 const instagramGradientMiddle = "#dd2a7b"; 
 const instagramGradientEnd = "#8134af"; 
-const instagramBlue = "#3897f0"; 
+const instagramBlue = "#2d8de6ff"; 
 const instagramDarkBackground = "#142127";
 const instagramLightBackground = "#ffffff";
 // const feedDarkBackground = 'p';

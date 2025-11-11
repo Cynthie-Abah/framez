@@ -7,7 +7,7 @@ import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ellipsis, Heart, MessageCircle } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     Dimensions,
     ScrollView,
@@ -39,9 +39,16 @@ export default function PostCard({item}: {item: Post}) {
     }
 
     const handlePress = ()=> {
-
     router.push(`/other-profile/${item.authorId}`);
   }
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+
+  const onScroll = (event: any) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width);
+    setActiveIndex(index);
+  };
 
   return (
      <View style={[styles.postContainer]}>
@@ -70,9 +77,10 @@ export default function PostCard({item}: {item: Post}) {
           {/* Post image */}
             <ScrollView 
             horizontal={true} 
-            showsHorizontalScrollIndicator
+            showsHorizontalScrollIndicator={false}
             pagingEnabled
             style={{ height: 400 }}
+            onScroll={onScroll}
             contentContainerStyle={{ gap: 8 }}
             >
                 {item.image.map((image, index)=> 
@@ -87,6 +95,19 @@ export default function PostCard({item}: {item: Post}) {
                     />
                     )}
             </ScrollView>
+
+              {/* Pagination Dots */}
+      <View style={styles.paginationContainer}>
+        {item.image.map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.dot,
+              { backgroundColor: i === activeIndex ? theme.tint : theme.border },
+            ]}
+          />
+        ))}
+      </View>
     
           {/* Post actions */}
           <View style={styles.postActions}>
@@ -112,7 +133,7 @@ export default function PostCard({item}: {item: Post}) {
           <Text style={[styles.caption, { color: theme.placeholder }]}>{formatTimeAgo(item._creationTime)}</Text>
           
          {openComment && (
-            <Comments comments={item.comments} />
+            <Comments postId={item._id} comments={item.comments} />
 )}
         </View>
   )
@@ -157,4 +178,15 @@ export default function PostCard({item}: {item: Post}) {
         paddingBottom: 10,
         paddingHorizontal: 10,
     },
+     paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
     });

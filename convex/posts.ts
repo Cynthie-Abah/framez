@@ -72,7 +72,46 @@ export const updateLikes = mutation({
     return { success: true, message: `you liked a post` };
   },
 });
+// comment on a post
+export const updateComments = mutation({
+  args: {
+    id: v.id("posts"),
+    userId: v.id("users"),
+    userName: v.string(),
+    userAvatar: v.string(),
+    text: v.string(),
+    timestamp: v.number(),
+  },
 
+  handler: async (
+    { db },
+    { id, userId, userName, userAvatar, text, timestamp }: {
+      id: Id<'posts'>,
+      userId: Id<'users'>,
+      userName: string,
+      userAvatar: string,
+      text: string,
+      timestamp: number,
+    }
+  ) => {
+    const post = await db.get(id);
+
+    if (!post) return { success: false, message: "Post not found" };
+
+    const existingComments = post.comments ?? [];
+    const newComment = {
+      userId,
+      userName,
+      text,
+      timestamp,
+      userAvatar
+    };
+    const updatedComments = [...existingComments, newComment];
+
+    await db.patch(id, { comments: updatedComments });
+    return { success: true, message: "Comment added successfully" };
+  },
+});
 
 // delete a post - delete
 

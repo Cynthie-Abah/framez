@@ -1,16 +1,33 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
+import { Id } from '@/convex/_generated/dataModel';
+import { useComment } from '@/hooks/use-comment';
 import useAuthStore from '@/store';
 import { Comment } from '@/type';
+import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';
-import React from 'react';
-import { Text, TextInput, useColorScheme, View } from 'react-native';
+import React, { useState } from 'react';
+import { Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 
-const Comments = ({comments}: {comments: Comment[]}) => {
+const Comments = ({postId, comments}: {comments: Comment[], postId: Id<"posts">}) => {
+  const [comment, setComment] = useState<string>('');
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
     const {user} = useAuthStore();
+    const {commentOnPost} = useComment();
 
-    // REMEMBER TO COME BACK AND ADD COMMENT FUNCTIONALITY!!
+    const handleComment = ()=> {
+      if (!comment || !user) return
+
+      const newComment = {
+        postId, 
+        userId: user?._id as Id<"users">, 
+        userName: user?.username || '', 
+        userAvatar: user?.avatar || '', 
+        text: comment
+      }
+      commentOnPost(newComment)
+      setComment('')
+    }
     
   return (
     <View style={{ 
@@ -43,7 +60,7 @@ const Comments = ({comments}: {comments: Comment[]}) => {
         >
           {/* Avatar */}
           <Image
-            source={{ uri: comment.userAvatar }}
+            source={{ uri: comment.userAvatar || defaultAvatar }}
             style={{
               width: 35,
               height: 35,
@@ -65,10 +82,7 @@ const Comments = ({comments}: {comments: Comment[]}) => {
                 marginTop: 3,
               }}
             >
-              {new Date(comment.timestamp).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              })} 
+              {formatTimeAgo(comment.timestamp)} 
               {/* · Reply */}
             </Text>
           </View>
@@ -101,13 +115,16 @@ const Comments = ({comments}: {comments: Comment[]}) => {
       <TextInput
         placeholder="Add a comment..."
         placeholderTextColor={theme.icon}
+        value={comment}
+        onChangeText={setComment}
         style={{
           flex: 1,
           color: theme.text,
           fontSize: 14,
         }}
       />
-      <Text style={{ color: theme.tint, fontWeight: '600', fontSize: 15 }}>Post</Text>
+
+      <TouchableOpacity onPress={handleComment}><Text style={{ color: theme.tint, fontWeight: '600', fontSize: 15 }}>Post</Text></TouchableOpacity>
     </View>
   </View>
   )
