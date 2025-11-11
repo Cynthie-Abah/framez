@@ -1,18 +1,18 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
 import { useUserProfile } from '@/hooks/use-user-profile';
-import useAuthStore from '@/store';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const Profile = ({type}: {type: 'user' | 'others'}) => {
+const Profile = ({type, userId}: {type: 'user' | 'others', userId: string}) => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-  const {user: item} = useAuthStore();
-  const {userProfile, error, isLoading} = useUserProfile(item?._id as Id<"users">)
+  const {userProfile, error, isLoading} = useUserProfile(userId as Id<"users">)
+  const router = useRouter();
 
 if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}><ActivityIndicator /></SafeAreaView>
   return (
@@ -20,7 +20,7 @@ if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: 
         {/* page header */}
         <View style={styles.pageHeader}>
           {/* set the back button */}
-            <TouchableOpacity><ChevronLeft strokeWidth={4} color={theme.text} size={26} /></TouchableOpacity>
+            <TouchableOpacity onPress={()=> router.back()}><ChevronLeft strokeWidth={4} color={theme.text} size={26} /></TouchableOpacity>
             <Text style={{
                 color: theme.text, 
                 fontWeight: 800, 
@@ -172,6 +172,7 @@ export default Profile;
         justifyContent: 'space-between',
         marginBottom: 12,
         paddingHorizontal: 15,
+        gap: 10,
     },
     button: {
         flex: 1,

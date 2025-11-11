@@ -53,7 +53,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)/_layout" />
               <Stack.Screen name="(tabs)/feed" />
               <Stack.Screen name="(tabs)/create-post" />
-              {/* <Stack.Screen name="(tabs)/profile/[userId]" /> */}
+              <Stack.Screen name="other-users/[id]" />
               <Stack.Screen name="(tabs)/user-profile" />
             </Authenticated>
           </Stack>

@@ -5,6 +5,7 @@ import useAuthStore from '@/store';
 import { Post } from '@/type';
 import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { Ellipsis, Heart, MessageCircle } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -26,6 +27,7 @@ export default function PostCard({item}: {item: Post}) {
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
     const {toggleLike} = useToggleLike();
     const {user} = useAuthStore();
+    const router = useRouter();
 
     const isLiked = item.likes.find((like)=> like.userId  === user?._id )
 
@@ -36,13 +38,18 @@ export default function PostCard({item}: {item: Post}) {
         
     }
 
+    const handlePress = ()=> {
+
+    router.push(`/other-profile/${item.authorId}`);
+  }
+
   return (
      <View style={[styles.postContainer]}>
     
           {/* Post header */}
           <View style={styles.postHeaderContainer}>
     
-            <TouchableOpacity style={styles.postHeader}>
+            <TouchableOpacity onPress={handlePress} style={styles.postHeader}>
     
                 <Image source={{ 
                     uri: item.userAvatar || defaultAvatar
