@@ -8,6 +8,7 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Redirect, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native";
+import { PaperProvider } from "react-native-paper";
 import "react-native-reanimated";
 import Toast from 'react-native-toast-message';
 //  const messages = useQuery(api.messages.getForCurrentUser); //how to get stuff for user
@@ -38,7 +39,7 @@ export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={clerkPublishableKey} tokenCache={tokenCache}>
     <ConvexProviderWithClerk useAuth={useAuth} client={convex}>
-      
+      <PaperProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
             {/* Auth Screens */}
@@ -63,7 +64,7 @@ export default function RootLayout() {
 
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>
-      
+      </PaperProvider>
     </ConvexProviderWithClerk>
     <Toast />
     </ClerkProvider>

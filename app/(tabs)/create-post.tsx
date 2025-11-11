@@ -91,6 +91,8 @@ export default function CreatePost() {
   };
 
   handleCreatePost(newPost);
+  setImages([])
+  setCaption('')
   };
 
   return (

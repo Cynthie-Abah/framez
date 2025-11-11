@@ -114,6 +114,27 @@ export const updateComments = mutation({
 });
 
 // delete a post - delete
+export const deletePost = mutation({
+  args: {postId: v.id("posts"), userId: v.id("users")},
+
+  handler: async (
+    { db },
+    { postId, userId }: {
+      postId: Id<'posts'>,
+      userId: Id<'users'>,
+    }
+  ) => {
+    const post = await db.get(postId);
+
+    if (!post) return { success: false, message: "Post not found" };
+    if (post.authorId === userId) {
+      await db.delete(postId);
+      return { success: true, message: "Post deleted successfully" };
+    } else {
+      return { success: false, message: "You are not authorized to delete this post" };
+    }
+  },
+});
 
 // follow/unfollow a user - update
 export const updateFollow = mutation({

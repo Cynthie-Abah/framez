@@ -1,5 +1,6 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
+import { useDeletePost } from '@/hooks/use-delete-post';
 import { useToggleLike } from '@/hooks/use-like-post';
 import useAuthStore from '@/store';
 import { Post } from '@/type';
@@ -7,17 +8,19 @@ import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ellipsis, Heart, MessageCircle } from 'lucide-react-native';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 import Comments from './comments';
+import DeleteModal from './delete-modal';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -28,6 +31,8 @@ export default function PostCard({item}: {item: Post}) {
     const {toggleLike} = useToggleLike();
     const {user} = useAuthStore();
     const router = useRouter();
+   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+   const {deletePost} = useDeletePost();
 
     const isLiked = item.likes.find((like)=> like.userId  === user?._id )
 
@@ -42,13 +47,23 @@ export default function PostCard({item}: {item: Post}) {
     router.push(`/other-profile/${item.authorId}`);
   }
 
+  const handleDelete = () => {
+    const details = { 
+      postId: item._id, 
+      userId: user?._id as Id<"users">
+     }
+    deletePost(details)
+  }
+
   const [activeIndex, setActiveIndex] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
+  // const scrollRef = useRef<ScrollView>(null);
+  const [openPostMenu, setOpenPostMenu] = useState(false);
 
   const onScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width);
     setActiveIndex(index);
   };
+
 
   return (
      <View style={[styles.postContainer]}>
@@ -67,11 +82,24 @@ export default function PostCard({item}: {item: Post}) {
                     <Text style={[styles.username, { color: theme.placeholder }]}>{item.email}</Text>
                 </View>
             </TouchableOpacity>
-    
-            <View>
-                <Ellipsis size={20} color={'white'} />
-            </View>
-    
+
+        <TouchableOpacity onPress={()=> setOpenPostMenu(!openPostMenu)}>
+          <Ellipsis size={25} color={theme.text}/>
+        </TouchableOpacity>
+
+        {/** Dropdown */}
+        {openPostMenu && (
+          <Animated.View style={[styles.dropdown,{backgroundColor: theme.background} ]}>
+            {/* EDIT POST */}
+            {/* <TouchableOpacity style={styles.item} >
+              <Text style={{color: theme.text, fontWeight: '600'}}>Edit</Text>
+            </TouchableOpacity> */}
+
+            <TouchableOpacity style={styles.item}>
+              <Text onPress={()=> setOpenDeleteModal(true)} style={{color: theme.text, fontWeight: '600'}}>Delete</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
           </View>
     
           {/* Post image */}
@@ -134,11 +162,15 @@ export default function PostCard({item}: {item: Post}) {
           
          {openComment && (
             <Comments postId={item._id} comments={item.comments} />
-)}
+        )}
+        <DeleteModal 
+        openDeleteModal={openDeleteModal} 
+        setOpenDeleteModal={setOpenDeleteModal}
+        onDelete={handleDelete}
+        />
         </View>
   )
 }
-
 
     const styles = StyleSheet.create({
     avatar: {
@@ -160,6 +192,7 @@ export default function PostCard({item}: {item: Post}) {
         justifyContent: 'space-between', 
         alignItems: 'center', 
         padding: 10,
+        position: 'relative',
     },
     username: {
         fontWeight: '600',
@@ -189,4 +222,18 @@ export default function PostCard({item}: {item: Post}) {
     borderRadius: 4,
     marginHorizontal: 4,
   },
+  dropdown: {
+    position: 'absolute',
+    top: 50,
+    right: 10,
+    borderRadius: 8,
+    padding: 8,
+    elevation: 5,
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    zIndex: 10,
+  },
+  item: { padding: 12 },
     });
