@@ -67,6 +67,7 @@ export interface Post {
   likes: Like[];
   comments: Comment[];
   _creationTime: number
+  isEdited?: boolean
 }
 
 export interface newPost {

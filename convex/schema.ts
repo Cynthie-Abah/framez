@@ -25,6 +25,8 @@ export default defineSchema({
         userAvatar: v.string(),  
         image: v.array(v.string()),
         text: v.string(),
+        isEdited: v.optional(v.boolean()),
+        updatedAt: v.optional(v.number()),
         likes: v.array(v.object({
             userId: v.id("users"),
             timeStamp: v.number()

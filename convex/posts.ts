@@ -18,6 +18,7 @@ export const uploadPost = mutation({
       ...args,
       likes: [],
       comments: [],
+      isEdited: false
     };
     const productId = await db.insert("posts", postData);
     return { success: true, message: "Your post has been uploaded successfully", id: productId };
@@ -30,6 +31,14 @@ export const getAllPosts = query({
     const posts = await db
       .query("posts")
       .collect();
+    return posts;
+  },
+});
+
+// fetch a post - read - CONSUMED
+export const getPostbyId = query({
+  handler: async ({db}, {postId}: {postId: Id<"posts">}) => {
+    const posts = await db.get(postId)
     return posts;
   },
 });
@@ -231,5 +240,29 @@ export const updateFollow = mutation({
     await db.patch(id, { following: updatedFollowing });
     await db.patch(userId, { followers: updatedFollowers });
     return { success: true, message: alreadyFollowing ? `You unfollowed ${username}` : `You followed ${username}` };
+  },
+});
+
+// edit a post - update
+export const editPost = mutation({
+  args: {
+    id: v.id("posts"),
+    userId: v.id("users"),
+    text: v.string(),
+    image: v.array(v.string()),
+  },
+
+  handler: async (
+    { db },
+    { id, userId, text, image }
+  ) => {
+    const post = await db.get(id);
+
+    if (!post) return { success: false, message: "Post not found" };
+
+    if (post.authorId !== userId) return {success: false, message: "You are not authorized to edit this post" }
+// ADD FIELD FOR IS_EDITED - so that you can show something like 'edited soso mins ago': this wont work cos you dont have a timestamp for posts in gen and it would require a lot of changes
+    await db.patch(id, { text, image, isEdited: true, updatedAt: Date.now() });
+    return { success: true, message: "Successfully updated post" };
   },
 });

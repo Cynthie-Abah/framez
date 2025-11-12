@@ -112,7 +112,7 @@ if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: 
 
       {/* User posts */}
       <FlatList
-        data={userProfile.posts}
+        data={userProfile.posts?.reverse()}
         keyExtractor={(item) => item._id}
         numColumns={3}
         columnWrapperStyle={{ 

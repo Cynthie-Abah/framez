@@ -46,6 +46,7 @@ export default function PostCard({item}: {item: Post}) {
 
     const handlePress = ()=> {
     router.push(`/other-profile/${item.authorId}`);
+
   }
 
   const handleDelete = () => {
@@ -54,6 +55,12 @@ export default function PostCard({item}: {item: Post}) {
       userId: user?._id as Id<"users">
      }
     deletePost(details)
+    setOpenPostMenu(false)
+  }
+
+  const routeToEdit = ()=> {
+    router.push(`/(tabs)/create-post?postId=${item._id}`)
+    setOpenPostMenu(false)
   }
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -94,9 +101,9 @@ export default function PostCard({item}: {item: Post}) {
           {canDelete &&
             <>
             {/* EDIT POST */}
-            {/* <TouchableOpacity style={styles.item} >
+            <TouchableOpacity onPress={routeToEdit} style={styles.item} >
               <Text style={{color: theme.text, fontWeight: '600'}}>Edit</Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.item}>
               <Text onPress={()=> setOpenDeleteModal(true)} style={{color: theme.text, fontWeight: '600'}}>Delete</Text>
