@@ -58,17 +58,16 @@ export default function SignUpScreen() {
         text2: err.message
         });  
         }
-      console.error(JSON.stringify(err, null, 2))
+      console.error(err);
     }
   }
-
 
   const onVerifyPress = async () => {
      if (!isLoaded) return;
   try {
     const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
 
-    if (signUpAttempt.status === "complete") {
+    if (signUpAttempt.status === "complete" && signUpAttempt.createdSessionId ) {
       await setActive({ session: signUpAttempt.createdSessionId });
       router.replace('/(tabs)/feed')
         setClerkEmail(emailAddress)   

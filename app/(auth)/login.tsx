@@ -41,16 +41,16 @@ const LoginScreen = () => {
         setClerkEmail(emailAddress)    
             return;
       } else {
-       
+
             Toast.show({
             type: 'error',
             text1: 'Unknown error occurred during sign-in',
             });  
                 
-        console.error(JSON.stringify(signInAttempt, null, 2));
+        console.log('Sign-in attempt:', signInAttempt);
       }
     } catch (err: unknown) {
-      console.error(JSON.stringify(err, null, 2));
+      console.log('Error:', err);
       if (err instanceof Error) {
         
     Toast.show({

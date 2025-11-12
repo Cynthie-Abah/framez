@@ -12,8 +12,22 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
-    }
+  "autoIncrement": true,
+  "android": {
+    "buildType": "apk"
+  },
+  "env": {
+    "CONVEX_DEPLOYMENT": "dev:dynamic-wildcat-640",
+    "EXPO_PUBLIC_CONVEX_URL": "https://energized-mammoth-946.convex.cloud",
+    "UPLOADTHING_TOKEN": "eyJhcGlLZXkiOiJza19saXZlXzQzOWY4MTE5ZjdiMzJkYTY4MzYzODBjMzFiMjBjNjkwYTg2NjAwMTFjMTMwMDNlMGU5MGQ2ODk5OTU3M2Q5YzUiLCJhcHBJZCI6InR0NTM0NzBxa2IiLCJyZWdpb25zIjpbInNlYTEiXX0=",
+    "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuYWJhaG9qb21hY3ludGhpYS5mcmFtZXok",
+    "CLERK_JWT_ISSUER_DOMAIN": "https://clerk.abahojomacynthia.framez",
+    "CLOUDINARY_API": "583291513247728",
+    "YOUR_CLOUD_NAME": "dfuebxv0b",
+    "YOUR_UNSIGNED_PRESET": "framez"
+  }
+}
+
   },
   "submit": {
     "production": {}
