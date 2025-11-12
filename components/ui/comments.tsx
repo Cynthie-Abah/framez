@@ -2,6 +2,7 @@ import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
 import { useComment } from '@/hooks/use-comment';
 import { useDeleteComment } from '@/hooks/use-delete-comment';
+import { useFetchUserByEmail } from '@/hooks/use-fetch-userbyemail';
 import { Comment } from '@/type';
 import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';

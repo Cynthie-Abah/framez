@@ -100,6 +100,7 @@ const LoginScreen = () => {
         rules={{ required: "Password is required" }}
         render={({ field: { onChange, value } }) => (
         <Input 
+        secureTextEntry
           value={value} 
           setValue={onChange}
           placeholder="Enter Password"
