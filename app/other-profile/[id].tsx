@@ -1,5 +1,5 @@
 import Profile from '@/components/ui/profile';
-import useAuthStore from '@/store';
+import { useFetchUserByEmail } from '@/hooks/use-fetch-userbyemail';
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const OtherProfile = () => {
   const { id } = useLocalSearchParams();
-  const {user} = useAuthStore();
+  const {user} = useFetchUserByEmail()
 
   if (!id || Array.isArray(id)) {
     return (

@@ -3,20 +3,12 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { Post, user } from './type';
 
-type CreateUserFn = (payload: {
-    clerkId?: string;
-    email?: string | null;
-    username?: string | null;
-    followers: string[];
-    following: string[];
-}) => Promise<void>;
-
 interface AuthState {
     isAuthenticated: boolean;
     user: user | null;
     email: string
     setClerkEmail: (email: string) => void;
-    setUser: (user: user) => void;
+    setUser: (user: user | null) => void;
     clearUser: () => void;
     login: () => void;
     signup: () => void;

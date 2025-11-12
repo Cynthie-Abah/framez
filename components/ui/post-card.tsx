@@ -1,8 +1,8 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
 import { useDeletePost } from '@/hooks/use-delete-post';
+import { useFetchUserByEmail } from '@/hooks/use-fetch-userbyemail';
 import { useToggleLike } from '@/hooks/use-like-post';
-import useAuthStore from '@/store';
 import { Post } from '@/type';
 import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';
@@ -29,7 +29,7 @@ export default function PostCard({item}: {item: Post}) {
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
     const {toggleLike} = useToggleLike();
-    const {user} = useAuthStore();
+    const {user} = useFetchUserByEmail()
     const router = useRouter();
    const [openDeleteModal, setOpenDeleteModal] = useState(false);
    const {deletePost} = useDeletePost();
@@ -64,7 +64,6 @@ export default function PostCard({item}: {item: Post}) {
   }
 
   const [activeIndex, setActiveIndex] = useState(0);
-  // const scrollRef = useRef<ScrollView>(null);
   const [openPostMenu, setOpenPostMenu] = useState(false);
 
   const onScroll = (event: any) => {

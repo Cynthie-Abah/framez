@@ -1,6 +1,7 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
 import { useEditProfile } from '@/hooks/use-edit-profile';
+import { useFetchUserByEmail } from '@/hooks/use-fetch-userbyemail';
 import { uploadToCloudinary } from '@/utils/helper';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';

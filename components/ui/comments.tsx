@@ -2,7 +2,6 @@ import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
 import { useComment } from '@/hooks/use-comment';
 import { useDeleteComment } from '@/hooks/use-delete-comment';
-import useAuthStore from '@/store';
 import { Comment } from '@/type';
 import { formatTimeAgo } from '@/utils/helper';
 import { Image } from 'expo-image';
@@ -14,7 +13,7 @@ const Comments = ({postId, comments, canDelete}: {comments: Comment[], postId: I
   const [comment, setComment] = useState<string>('');
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-    const {user} = useAuthStore();
+    const {user} = useFetchUserByEmail()
     const {commentOnPost} = useComment();
     const { deleteComment } = useDeleteComment();
 

@@ -1,12 +1,12 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import useAuthStore from "@/store";
 import { useMutation } from "convex/react";
 import { useState } from "react";
+import { useFetchUserByEmail } from "./use-fetch-userbyemail";
 
 export const useToggleFollow = () => {
   const toggleFollowMutation = useMutation(api.posts.updateFollow);
-  const {user} = useAuthStore();
+  const {user} = useFetchUserByEmail()
   const id = user?._id as Id<"users">
   const [isLoading, setIsLoading] = useState(false);
 

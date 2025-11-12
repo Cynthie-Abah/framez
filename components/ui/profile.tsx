@@ -1,8 +1,8 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
+import { useFetchUserByEmail } from '@/hooks/use-fetch-userbyemail';
 import { useToggleFollow } from '@/hooks/use-follow';
 import { useUserProfile } from '@/hooks/use-user-profile';
-import useAuthStore from '@/store';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -13,10 +13,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const Profile = ({type, userId}: {type: 'user' | 'others', userId: string}) => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-  const {userProfile, error, isLoading} = useUserProfile(userId as Id<"users">)
+  const {userProfile, isLoading} = useUserProfile(userId as Id<"users">)
   const router = useRouter();
   const { toggleFollow, isLoading: isFollowing} = useToggleFollow();
-  const {user} = useAuthStore();
+  const {user, isLoading: isfetching} = useFetchUserByEmail();
   
   const handleFollow =()=> {
       const details = {
@@ -32,7 +32,17 @@ const Profile = ({type, userId}: {type: 'user' | 'others', userId: string}) => {
 );
     
 
-if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}><ActivityIndicator /></SafeAreaView>
+if (isLoading || isfetching) return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator />
+    </SafeAreaView>
+  );
+
+  if (!user) return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>User not found</Text>
+    </SafeAreaView>
+  );
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.feedBackground }]}>
         {/* page header */}

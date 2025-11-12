@@ -25,7 +25,7 @@ export interface clerkUser {
     avatar?: string;
 }
 export interface user {
-    _id: string;
+    _id: Id<"users">;
     username: string;
     email: string;
     clerkId: string,
