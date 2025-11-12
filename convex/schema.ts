@@ -5,6 +5,7 @@ export default defineSchema({
         clerkId: v.string(),
         username: v.string(),
         email: v.string(),
+        bio: v.optional(v.string()),
         avatar: v.optional(v.string()),
         followers: v.array(v.object({
             userId: v.id("users"),

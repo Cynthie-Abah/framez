@@ -77,14 +77,14 @@ if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: 
       {/* Username and bio */}
       <View style={styles.userInfo}>
         <Text style={[styles.username, { color: theme.text }]}>{userProfile.username}</Text>
-        <Text style={[styles.bio, { color: theme.text }]}>Travel, Photography & Lifestyle 📸✈️</Text>
+        <Text style={[styles.bio, { color: theme.text }]}>{userProfile.bio || 'Edit your bio to match your...'}</Text>
       </View>
 
         {
             type === 'user' ? (
         // Edit Profile redirects to settings - remeber to add that functionality 
         <View style={styles.actionButtons}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: theme.ashButton}]}>
+            <TouchableOpacity onPress={()=> router.push('/edit-profile')} style={[styles.button, { backgroundColor: theme.ashButton}]}>
             <Text style={[styles.buttonText, {color: theme.text}]}>Edit Profile</Text>
             </TouchableOpacity>
         </View>

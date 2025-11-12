@@ -43,6 +43,7 @@ export const createUser = mutation({
 
   },
 });
+
 // READ - Get a user info by clerkid
 export const getUserById = query({
   args: { userId: v.string() },
@@ -64,11 +65,33 @@ export const getUserByConvexId = query({
   },
 });
 
+// READ - Get all users
 export const getAllUsers = query({
   handler: async ({db}) => {
     const posts = await db
       .query("users")
       .collect();
     return posts;
+  },
+});
+
+// UPDATE - update the user profile details
+export const updateUserProfile = mutation({
+  args: {
+    userId: v.id("users"),
+    avatar: v.string(),
+    username: v.string(),
+    bio: v.string(),
+  },
+
+  handler: async (
+    { db },
+    { userId, avatar, username, bio }
+  ) => {
+    const user = await db.get(userId);
+
+    if (!user) return { success: false, message: "User not found" };
+    await db.patch(userId, { avatar, username, bio });
+      return { success: true, message: "Profile updated successfully" };
   },
 });

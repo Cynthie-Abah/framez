@@ -5,6 +5,7 @@ export interface newUser {
     username: string;
     email: string;
     avatar?: string;
+    bio?: string;
     followers: {
         userId: Id<"users">;
         username: string;
@@ -29,6 +30,7 @@ export interface user {
     email: string;
     clerkId: string,
     avatar?: string;
+    bio?: string;
     followers: {
         userId: Id<"users">;
         username: string;
@@ -75,9 +77,3 @@ export interface newPost {
   image: string[];
   text: string;
 }
-
-// Argument of type 'newPost' is not assignable to parameter of type '{ email: string; authorId: Id<"users">; userName: string; userAvatar: string; image: string[]; text: string; }'.
-//   Types of property 'authorId' are incompatible.
-//     Type 'string' is not assignable to type 'Id<"users">'.
-//       Type 'string' is not assignable to type '{ __tableName: "users"; }'.ts(2345)
-// (parameter) post: newPost

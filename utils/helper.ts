@@ -1,3 +1,4 @@
+// import { YOUR_CLOUD_NAME, YOUR_UNSIGNED_PRESET } from 'react-native-dotenv';
 // export function formatTimeAgo(timestamp: number) {
 //   const now = new Date();
 //   const postDate = new Date(timestamp);
@@ -49,3 +50,26 @@ export function formatTimeAgo(timestamp: number) {
     return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
   }
 }
+
+export async function uploadToCloudinary(imageUri: string) {
+  // these are exposed... remember them 
+  const cloudName ="dfuebxv0b";
+  const uploadPreset = "framez";
+
+  const formData = new FormData();
+  formData.append('file', {
+    uri: imageUri,
+    type: 'image/jpeg',
+    name: 'upload.jpg',
+  } as any);
+  formData.append('upload_preset', uploadPreset);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await response.json();
+  return data.secure_url; 
+}
+

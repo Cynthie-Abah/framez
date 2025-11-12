@@ -2,6 +2,7 @@ import { Colors } from "@/constants/theme";
 import { Id } from "@/convex/_generated/dataModel";
 import { useCreatePost } from "@/hooks/use-create-post";
 import useAuthStore from "@/store";
+import { uploadToCloudinary } from "@/utils/helper";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
@@ -47,7 +48,8 @@ export default function CreatePost() {
 
           if (!result.canceled) {
             const uri = result.assets[0].uri;
-            setImages((prev) => [...prev, uri]);
+            const imageUrl = await uploadToCloudinary(uri);
+              setImages((prev) => [...prev, imageUrl]);
           }
         },
       },
@@ -67,8 +69,11 @@ export default function CreatePost() {
           });
 
           if (!result.canceled) {
-            const uris = result.assets.map((a) => a.uri);
-            setImages((prev) => [...prev, ...uris]);
+            const uris = result.assets.map((a) => a.uri );
+            for (const uri of uris) {
+              const imageUrl = await uploadToCloudinary(uri);
+              setImages((prev) => [...prev, imageUrl]);
+            }
           }
         },
       },

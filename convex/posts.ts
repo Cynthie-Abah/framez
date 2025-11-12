@@ -233,9 +233,3 @@ export const updateFollow = mutation({
     return { success: true, message: alreadyFollowing ? `You unfollowed ${username}` : `You followed ${username}` };
   },
 });
-
-// fetch user profile data - read
-
-// fetch all post by a specific user - read
-
-// edit user profile - update
