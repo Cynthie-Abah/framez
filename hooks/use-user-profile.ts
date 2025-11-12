@@ -14,7 +14,7 @@ export const useUserProfile = (userId: Id<'users'>) => {
 
     const userProfile = {
         ...user,
-        posts: posts
+        posts: posts?.reverse()
     }
 
   return { userProfile, isLoading, error };

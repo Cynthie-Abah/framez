@@ -112,7 +112,7 @@ if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: 
 
       {/* User posts */}
       <FlatList
-        data={userProfile.posts?.reverse()}
+        data={userProfile.posts}
         keyExtractor={(item) => item._id}
         numColumns={3}
         columnWrapperStyle={{ 
@@ -120,6 +120,7 @@ if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: 
           'space-between' : 'flex-start' , 
           marginVertical: 1}}
         renderItem={({ item }) => (
+          <TouchableOpacity style={styles.postImageContainer} onPress={()=> router.push(`/user-posts?postId=${item._id}`)}>
           <Image
             source={{ uri: item.image[0] }}
             style={styles.postImage}
@@ -127,6 +128,7 @@ if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: 
             cachePolicy="memory-disk"
             priority="high"
           />
+          </TouchableOpacity>
         )}
         contentContainerStyle={{ marginTop: 10 }}
       />
@@ -208,6 +210,11 @@ export default Profile;
         fontWeight: '600',
     },
     postImage: {
+        width: '100%',
+        aspectRatio: 1,
+        borderRadius: 1,
+    },
+    postImageContainer: {
         width: '33%',
         aspectRatio: 1,
         borderRadius: 1,

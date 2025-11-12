@@ -87,7 +87,7 @@ export default function PostCard({item}: {item: Post}) {
     
                 <View style={{gap: 4}}>
                     <Text style={[styles.username, { color: theme.text }]}>{item.userName}</Text>
-                    <Text style={[styles.username, { color: theme.placeholder }]}>{item.email}</Text>
+                    <Text style={[styles.username, { color: theme.placeholder, textTransform: 'lowercase' }]}>{item.email}</Text>
                 </View>
             </TouchableOpacity>
 
@@ -235,8 +235,8 @@ export default function PostCard({item}: {item: Post}) {
     marginTop: 8,
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: 6,
+    height: 6,
     borderRadius: 4,
     marginHorizontal: 4,
   },
