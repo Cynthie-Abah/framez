@@ -19,7 +19,7 @@ export interface newUser {
 }
 
 export interface clerkUser {
-    id: string;
+    id?: string;
     username: string;
     email: string;
     avatar?: string;

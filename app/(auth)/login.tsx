@@ -1,19 +1,19 @@
 import Input from '@/components/ui/input';
 import Logo from '@/components/ui/logo';
 import { Colors } from '@/constants/theme';
+import useAuthStore from '@/store';
 import { useSignIn } from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
-import React from "react";
 import { Controller, useForm } from 'react-hook-form';
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View
 } from "react-native";
 import Toast from 'react-native-toast-message';
 
@@ -23,11 +23,11 @@ type LoginForm = {
 }
 
 const LoginScreen = () => {
-
+  const router = useRouter()
   const { signIn, setActive, isLoaded } = useSignIn();
-  const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  const {setClerkEmail} = useAuthStore();
 
   const {control, handleSubmit, formState: {errors, isSubmitting}} = useForm<LoginForm>();
 
@@ -35,10 +35,10 @@ const LoginScreen = () => {
     if (!isLoaded) return;
     try {
       const signInAttempt = await signIn.create({ identifier: emailAddress, password });
-
       if (signInAttempt.status === 'complete') {
-        await setActive({ session: signInAttempt.createdSessionId });
-            router.replace('/feed');
+        await setActive({ session: signInAttempt.createdSessionId }); 
+        router.replace('/(tabs)/feed')
+        setClerkEmail(emailAddress)    
             return;
       } else {
        
@@ -69,6 +69,7 @@ const LoginScreen = () => {
       style={[styles.container, { backgroundColor: theme.background }]}
       behavior={Platform.OS === "ios" ? "padding" : 'height'}
     >
+      {/* <TouchableOpacity onPress={()=> router.back()}><ChevronLeft strokeWidth={4} color={theme.text} size={26} /></TouchableOpacity> */}
       <View style={styles.inner}>
         {/* Logo */}
         <View style={{ marginBottom: 70 }}>
@@ -84,7 +85,7 @@ const LoginScreen = () => {
         <Input 
           value={value} 
           setValue={onChange}
-          placeholder="Email or Username" 
+          placeholder="Email" 
         />
          )}
         />

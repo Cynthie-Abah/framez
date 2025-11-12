@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/theme";
+import useAuthStore from "@/store";
 import { useClerk } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { MenuIcon } from "lucide-react-native";
@@ -10,6 +11,7 @@ const Menu = () => {
     const [visible, setVisible] = useState(false);
     const toggleMenu = () => setVisible(!visible);
     const colorScheme = useColorScheme();
+    const {clearUser} = useAuthStore();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
 
     const { signOut } = useClerk()
@@ -18,13 +20,13 @@ const Menu = () => {
     const handleSignOut = async () => {
     try {
       await signOut()
+      clearUser()
       setVisible(false)
       router.replace('/')
     } catch (err) {
       console.error(JSON.stringify(err, null, 2))
     }
   }
-
 
   return (
     <View>

@@ -1,61 +1,18 @@
-import { api } from '@/convex/_generated/api';
-import { useConvexUser } from '@/hooks/use-convex-user';
 import useAuthStore from '@/store';
-import { useUser } from '@clerk/clerk-expo';
-import { useMutation } from 'convex/react';
 import { Tabs } from 'expo-router';
 import { Home, Plus, User } from 'lucide-react-native';
-import React, { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { HapticTab } from '../../components/haptic-tab';
 import { Colors } from '../../constants/theme';
 
 export default function TabLayout() {
-    const {setUser} = useAuthStore();
-    const {user: clerkUser, isSignedIn} = useUser();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light; 
-  const createUser = useMutation(api.users.createUser);
-  const { user: convexUser, isLoading, error } = useConvexUser(clerkUser?.id);
+  const { isAuthenticated} = useAuthStore();
 
-  // const handleTabPress = useCallback(({ navigation, route }) => ({
-  //   tabPress: (e) => {
-  //     if (navigation.isFocused() && route.name === 'nameOfYourTabScreen') {
-  //       console.log('Active tab tapped again in layout. Reloading...');
-  //       const scrollToTop = navigation.getParam('scrollToTop'); 
-  //     if (scrollToTop) {
-  //       scrollToTop();
-  //     }
-
-  //     }
-  //   },
-  // }), []);
-
-  useEffect(() => {
-    if (!clerkUser || !isSignedIn) return;
-
-    const syncUser = async () => {
-      const email =
-        (clerkUser as any).emailAddresses?.[0]?.emailAddress ??
-        (clerkUser as any).primaryEmailAddress ??
-        '';
-
-      await createUser({
-        clerkId: clerkUser.id,
-        email,
-        avatar: (clerkUser as any).imageUrl ?? '',
-        username: clerkUser.username ?? '',
-        followers: [],
-        following: [],
-      });
-
-      if (!isLoading && convexUser) {
-        setUser(convexUser);
-      }
-    };
-
-    syncUser();
-  }, [clerkUser, isSignedIn, convexUser, isLoading]);
+  if (!isAuthenticated)  {return <SafeAreaView style={{ flex: 1, backgroundColor: theme.feedBackground }}><ActivityIndicator /></SafeAreaView>}
 
   return (
     <Tabs
@@ -81,23 +38,7 @@ export default function TabLayout() {
         options={{
           title: 'feed',
           tabBarIcon: ({ color, focused }) => <Home strokeWidth={3} size={28} color={color} />,
-        }}
-        // listeners={ha}
-        
-//         listeners={({ navigation, route }) => ({
-//     tabPress: (e) => {
-//       const state = navigation.getState();
-//       const isFocused = state.routes[state.index].key === route.key;
-
-//       if (isFocused) {
-//         const scrollToTop = navigation.getParam('scrollToTop'); 
-//       if (scrollToTop) {
-//         scrollToTop();
-//       }
-//       }
-//     },
-//   })}
-      />
+        }}/>
 
       <Tabs.Screen
         name="create-post"

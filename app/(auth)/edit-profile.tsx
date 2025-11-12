@@ -1,23 +1,22 @@
 import { Colors, defaultAvatar } from '@/constants/theme';
 import { Id } from '@/convex/_generated/dataModel';
 import { useEditProfile } from '@/hooks/use-edit-profile';
-import useAuthStore from '@/store';
 import { uploadToCloudinary } from '@/utils/helper';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useColorScheme,
-    View
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -25,7 +24,7 @@ const EditProfile = () => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
     const router = useRouter();
-  const { user } = useAuthStore();
+  const {user} = useFetchUserByEmail();
   const { editUserProfile, isLoading } = useEditProfile();
 
   const [username, setUsername] = useState(user?.username || '');

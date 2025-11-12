@@ -37,8 +37,14 @@ export const createUser = mutation({
         following: [],
     }; 
 
-    const cart = await db.insert("users", newUser);
-    return { success: true, id: cart, message: "Cart created successfully" };
+    const users = await db.insert("users", newUser);
+    // get the clerk user after signup then return it here for me 
+     const user = await db
+      .query("users")
+      .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
+      .first();
+    return user;
+
       }
 
   },
@@ -51,6 +57,18 @@ export const getUserById = query({
     const user = await db
       .query("users")
       .filter((q) => q.eq(q.field("clerkId"), userId))
+      .first();
+    return user;
+  },
+});
+
+// READ - Get a user info by email
+export const getUserByEmail = query({
+  args: { email: v.string() },
+  handler: async ({ db }, { email }) => {
+    const user = await db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), email))
       .first();
     return user;
   },

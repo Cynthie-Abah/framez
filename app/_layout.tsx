@@ -3,7 +3,7 @@ import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { Pacifico_400Regular, useFonts } from "@expo-google-fonts/pacifico";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { Authenticated, ConvexReactClient, Unauthenticated, useConvexAuth } from "convex/react";
+import { Authenticated, ConvexReactClient, Unauthenticated } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Redirect, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -11,7 +11,7 @@ import { ActivityIndicator } from "react-native";
 import { PaperProvider } from "react-native-paper";
 import "react-native-reanimated";
 import Toast from 'react-native-toast-message';
-//  const messages = useQuery(api.messages.getForCurrentUser); //how to get stuff for user
+
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
 });
@@ -21,14 +21,17 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   function RootNavigator() {
-  const { isLoading, isAuthenticated } = useConvexAuth();
+  const { isLoaded, isSignedIn } = useAuth();
+  console.log(isLoaded, isSignedIn);
 
-  if (isLoading) return <Redirect href="/" />;
-  if (isAuthenticated) return <Redirect href="/(tabs)/feed" />;
-  return <Redirect href="/(auth)/login" />;
+ if ( !isLoaded) return <ActivityIndicator />;
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/login" />;
 }
-
-
+if(isLoaded && isSignedIn) {
+  return <Redirect href="/(tabs)/feed" />
+}
+}
 
   const [fontsLoaded] = useFonts({
     Pacifico_400Regular,
@@ -56,6 +59,8 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)/create-post" />
               <Stack.Screen name="other-users/[id]" />
               <Stack.Screen name="(tabs)/user-profile" />
+              <Stack.Screen name="edit-profile" />
+              <Stack.Screen name="user-posts" />
             </Authenticated>
           </Stack>
 

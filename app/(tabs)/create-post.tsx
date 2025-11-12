@@ -2,9 +2,9 @@ import { Colors } from "@/constants/theme";
 import { Id } from "@/convex/_generated/dataModel";
 import { useCreatePost } from "@/hooks/use-create-post";
 import { useEditPost } from "@/hooks/use-edit-post";
+import { useFetchUserByEmail } from "@/hooks/use-fetch-userbyemail";
 import usePickImages from "@/hooks/use-pick-image";
 import { useSinglePost } from "@/hooks/use-single-post";
-import useAuthStore from "@/store";
 import { useLocalSearchParams } from "expo-router";
 import { X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
@@ -29,7 +29,7 @@ export default function CreatePost() {
   const result = postId ? useSinglePost(typeof postId === 'string' ? postId as Id<"posts"> : '' as Id<"posts">) : null;
   const isLoading = result?.isLoading
   const post = result?.post
-  const { user } = useAuthStore();
+  const {user} = useFetchUserByEmail();
   const {handleCreatePost, isloading} = useCreatePost();
   const {editPost} = useEditPost()
   const {pickImages, isPicking, images, setImages} = usePickImages();

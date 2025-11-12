@@ -1,19 +1,17 @@
 import Menu from '@/components/ui/Menu';
 import PostCard from '@/components/ui/post-card';
 import { Colors, defaultAvatar } from '@/constants/theme';
+import { useFetchUserByEmail } from '@/hooks/use-fetch-userbyemail';
 import { usePosts } from '@/hooks/use-posts';
-import useAuthStore from '@/store';
 import { Post } from '@/type';
-import { useIsFocused } from '@react-navigation/native';
 import { Image } from 'expo-image';
-import { useNavigation } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import { useRouter } from 'expo-router';
+import React from 'react';
 import {
-    ActivityIndicator,
     FlatList,
-    ScrollView,
     StyleSheet,
     Text,
+    TouchableOpacity,
     useColorScheme,
     View
 } from 'react-native';
@@ -21,32 +19,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
     const Feed = () => {
     const colorScheme = useColorScheme();
-    const {user, isAuthenticated} = useAuthStore();
     const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-    const navigation = useNavigation();
-     const isFocused = useIsFocused();
-     const scrollRef = useRef<ScrollView>(null);
-
-       useEffect(() => {
-    const unsubscribe = navigation.addListener('tabPress' as any, (e: any) => {
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
-      console.log("Tab re-tapped → scrolled to top");
-    });
-
-    return unsubscribe;
-  }, [navigation, isFocused]);
-
-
-
+     const {user} = useFetchUserByEmail()
+     const router = useRouter();
+ 
     const renderPost = ({ item }: {item: Post}) => (
     <PostCard item={item} />
     );
 
-    const {posts, error, isLoading} = usePosts();
+    const {posts, error} = usePosts();
 
-     if ((!user && !isAuthenticated ) || isLoading) {
-        return <SafeAreaView style={{ flex: 1, backgroundColor: theme.feedBackground }}><ActivityIndicator /></SafeAreaView>
-     }
      if (error) {
         return <SafeAreaView style={{ 
             flex: 1, 
@@ -61,13 +43,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
         keyExtractor={(item) => item._id}
         ListHeaderComponent={
             <View style={[styles.headerContainer]}>
-            <Image
+                <TouchableOpacity onPress={()=> router.push('/(tabs)/user-profile')}>
+                    <Image
                 source={{ uri: 
                     user?.avatar ? 
                     user?.avatar : 
                     defaultAvatar }}
                 style={styles.avatar}
             />
+                </TouchableOpacity>
+            
             
             <Text style={{color: theme.text, fontWeight: 800, fontSize: 30, fontFamily: 'Pacifico_400Regular'}}> Framez</Text>
 

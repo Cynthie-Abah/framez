@@ -2,21 +2,20 @@ import EmailVerification from '@/components/ui/email-verification'
 import Input from '@/components/ui/input'
 import Logo from '@/components/ui/logo'
 import { Colors } from '@/constants/theme'
-import { api } from '@/convex/_generated/api'
+import useAuthStore from '@/store'
 import { useSignUp } from '@clerk/clerk-expo'
-import { useMutation } from 'convex/react'
-import { Link } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Controller, useForm } from "react-hook-form"
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View
 } from 'react-native'
 import Toast from 'react-native-toast-message'
 
@@ -28,23 +27,25 @@ type SignUpForm = {
 }
 
 export default function SignUpScreen() {
+  const router = useRouter()
   const { isLoaded, signUp, setActive } = useSignUp()
   const { control, watch, handleSubmit, formState: { errors, isSubmitting }} = useForm<SignUpForm>();
-
   const [pendingVerification, setPendingVerification] = useState(false)
   const [code, setCode] = useState('')
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-  const createUser = useMutation(api.users.createUser);
+  const {setClerkEmail} = useAuthStore();
 
+  const emailAddress = watch('emailAddress')
 
   const onSignUpPress = async (data: SignUpForm) => {
     if (!isLoaded) return
-    const { emailAddress, password } = data
+    const { emailAddress, password, username } = data
     try {
       await signUp.create({
         emailAddress,
         password,
+        username
       })
 
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
@@ -64,29 +65,19 @@ export default function SignUpScreen() {
 
   const onVerifyPress = async () => {
      if (!isLoaded) return;
-
   try {
     const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
 
     if (signUpAttempt.status === "complete") {
       await setActive({ session: signUpAttempt.createdSessionId });
-        const user = signUp;
-        if (user) {
-            await createUser({
-                clerkId: user?.id || '', 
-                email: user?.emailAddress || '', 
-                username: user?.username || '',
-                followers: [],
-                following: []
-            });
-            return user
-        }
+      router.replace('/(tabs)/feed')
+        setClerkEmail(emailAddress)   
     } else {
       console.error("Verification not complete:", JSON.stringify(signUpAttempt, null, 2));
     }
     } catch (err: any) {
         if (
-            err.code === "api_response_error" && 
+            err.code === "api_response_error" || 
             err.status === 429) {
         Toast.show({
             type: 'error',
@@ -103,7 +94,7 @@ export default function SignUpScreen() {
         text2: err.message
         });  
         }
-      console.error(JSON.stringify(err, null, 2))
+      console.error(err)
     }
   }
 

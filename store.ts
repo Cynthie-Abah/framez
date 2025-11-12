@@ -4,7 +4,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import type { Post, user } from './type';
 
 type CreateUserFn = (payload: {
-    clerkId: string;
+    clerkId?: string;
     email?: string | null;
     username?: string | null;
     followers: string[];
@@ -14,7 +14,10 @@ type CreateUserFn = (payload: {
 interface AuthState {
     isAuthenticated: boolean;
     user: user | null;
+    email: string
+    setClerkEmail: (email: string) => void;
     setUser: (user: user) => void;
+    clearUser: () => void;
     login: () => void;
     signup: () => void;
     logout: () => void;
@@ -25,7 +28,10 @@ const useAuthStore = create<AuthState>()(
     (set) => ({
       isAuthenticated: false,
       user: null,
+      email: '',
+      setClerkEmail: (email) => set({ isAuthenticated: true, email }),      
       setUser: (user) => set({ isAuthenticated: true, user }),
+      clearUser: () => set({ isAuthenticated: false, user: null }),
       login: () => set({ isAuthenticated: true }),
       signup: () => set({ isAuthenticated: true }),
       logout: () => set({ isAuthenticated: false, user: null }),

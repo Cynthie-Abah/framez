@@ -77,7 +77,7 @@ if(isLoading) return <SafeAreaView style={[styles.container, { backgroundColor: 
       {/* Username and bio */}
       <View style={styles.userInfo}>
         <Text style={[styles.username, { color: theme.text }]}>{userProfile.username}</Text>
-        <Text style={[styles.bio, { color: theme.text }]}>{userProfile.bio || 'Edit your bio to match your...'}</Text>
+        <Text style={[styles.bio, { color: theme.text }]}>{userProfile.bio || 'Edit your bio'}</Text>
       </View>
 
         {
